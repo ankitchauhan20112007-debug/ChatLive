@@ -41,3 +41,4 @@ login.onclick = () => {
     .catch((error) => {
       msg.innerHTML = error.message;
     });
+  };
