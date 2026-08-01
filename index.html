@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChatLive</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatLive</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="box">
-<h1>💬 ChatLive</h1>
+<div class="container">
+  <h1>💬 ChatLive</h1>
 
-<input type="email" placeholder="Email" id="email"><br><br>
+  <input type="email" id="email" placeholder="Enter Email">
 
-<input type="password" placeholder="Password" id="password"><br><br>
+  <input type="password" id="password" placeholder="Enter Password">
 
-<button id="signup">Create Account</button><br><br>
+  <button id="signup">Create Account</button>
 
-<button id="login">Login</button>
+  <button id="login">Login</button>
 
-<p id="msg"></p>
-
+  <p id="msg"></p>
 </div>
 
 <script type="module" src="firebase.js"></script>
