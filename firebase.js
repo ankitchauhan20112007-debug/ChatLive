@@ -35,9 +35,9 @@ signup.onclick = () => {
 
 login.onclick = () => {
   signInWithEmailAndPassword(auth, email.value, password.value)
-    .then(() => {
-      msg.innerHTML = "✅ Login Successful";
-    })
+.then(() => {
+    window.location.href = "chat.html";
+})
     .catch((error) => {
       msg.innerHTML = error.message;
     });
