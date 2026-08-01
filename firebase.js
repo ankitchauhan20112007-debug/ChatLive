@@ -25,9 +25,9 @@ const msg = document.getElementById("msg");
 
 signup.onclick = () => {
   createUserWithEmailAndPassword(auth, email.value, password.value)
-    .then(() => {
-      msg.innerHTML = "✅ Account Created Successfully";
-    })
+ .then(() => {
+    window.location.href = "chat.html";
+})
     .catch((error) => {
       msg.innerHTML = error.message;
     });
