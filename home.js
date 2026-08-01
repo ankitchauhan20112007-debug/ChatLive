@@ -1,1 +1,51 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "chatlive-bac03.firebaseapp.com",
+  projectId: "chatlive-bac03",
+  storageBucket: "chatlive-bac03.firebasestorage.app",
+  messagingSenderId: "1097708548558",
+  appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const usersDiv = document.getElementById("users");
+const logoutBtn = document.getElementById("logout");
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const snapshot = await getDocs(collection(db, "users"));
+  usersDiv.innerHTML = "";
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+
+    if (data.email !== user.email) {
+      usersDiv.innerHTML += `<div>${data.email}</div>`;
+    }
+  });
+});
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
