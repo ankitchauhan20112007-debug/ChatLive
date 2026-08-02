@@ -37,10 +37,11 @@ signup.onclick = async () => {
       password.value
     );
 
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      email: email.value
-    });
+   await setDoc(doc(db, "users", userCredential.user.uid), {
+  uid: userCredential.user.uid,
+  name: name.value,
+  email: email.value
+});
 
     window.location.href = "home.html";
   } catch (error) {
