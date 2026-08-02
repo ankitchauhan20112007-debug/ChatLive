@@ -40,7 +40,18 @@ onAuthStateChanged(auth, async (user) => {
     const data = doc.data();
 
     if (data.email !== user.email) {
-      usersDiv.innerHTML += `<div>${data.email}</div>`;
+      const div = document.createElement("div");
+div.innerHTML = data.email;
+div.style.padding = "12px";
+div.style.borderBottom = "1px solid #ccc";
+div.style.cursor = "pointer";
+
+div.onclick = () => {
+  localStorage.setItem("chatUser", data.email);
+  window.location.href = "chat.html";
+};
+
+usersDiv.appendChild(div);
     }
   });
 });
