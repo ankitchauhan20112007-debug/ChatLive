@@ -40,8 +40,7 @@ onAuthStateChanged(auth, async (user) => {
     const data = doc.data();
 
     if (data.email !== user.email) {
-      const div = document.createElement("div");
-div.innerHTML = data.email;
+      const div = document.createElement("div");div.innerHTML = data.name || data.email;
 div.style.padding = "12px";
 div.style.borderBottom = "1px solid #ccc";
 div.style.cursor = "pointer";
