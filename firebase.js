@@ -23,8 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const email = document.getElementById("email");
+const name = document.getElementById("name");
 const password = document.getElementById("password");
 const signup = document.getElementById("signup");
 const login = document.getElementById("login");
