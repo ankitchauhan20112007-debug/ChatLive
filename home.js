@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+ apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
   authDomain: "chatlive-bac03.firebaseapp.com",
   projectId: "chatlive-bac03",
   storageBucket: "chatlive-bac03.firebasestorage.app",
