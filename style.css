@@ -2,38 +2,66 @@ body{
     margin:0;
     padding:0;
     font-family:Arial,sans-serif;
-    background:#2196F3;
+    background:#ece5dd;
 }
 
-.box{
-    width:300px;
-    margin:80px auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
+.container{
+    width:100%;
+    max-width:450px;
+    margin:auto;
+    height:100vh;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+}
+
+h2{
+    margin:0;
+    padding:15px;
+    background:#075E54;
+    color:white;
     text-align:center;
-    box-shadow:0 0 10px gray;
 }
 
-h1{
-    color:#2196F3;
-}
-
-input{
-    width:90%;
+#messages{
+    flex:1;
+    overflow-y:auto;
     padding:10px;
+    background:#ece5dd;
+}
+
+#messages p{
+    background:#DCF8C6;
+    padding:10px 15px;
+    border-radius:10px;
     margin:8px 0;
-    border:1px solid #ccc;
-    border-radius:5px;
+    width:fit-content;
+    max-width:80%;
+    word-wrap:break-word;
 }
 
-button{
-    width:95%;
+.bottom{
+    display:flex;
     padding:10px;
-    margin-top:10px;
-    background:#2196F3;
+    background:#f0f0f0;
+}
+
+#message{
+    flex:1;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:25px;
+    outline:none;
+}
+
+#send{
+    margin-left:10px;
+    background:#25D366;
     color:white;
     border:none;
-    border-radius:5px;
-    font-size:16px;
+    border-radius:50%;
+    width:50px;
+    height:50px;
+    font-size:18px;
+    cursor:pointer;
 }
