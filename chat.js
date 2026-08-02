@@ -28,10 +28,14 @@ const send = document.getElementById("send");
 send.onclick = async () => {
   if (input.value.trim() === "") return;
 
-  await addDoc(collection(db, "messages"), {
-    text: input.value,
-    time: serverTimestamp()
-  });
+ await addDoc(collection(db, "messages"), {
+  text: input.value,
+  time: serverTimestamp(),
+  createdAt: new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+});
 
   input.value = "";
 };
@@ -41,7 +45,13 @@ const q = query(collection(db, "messages"), orderBy("time"));
 onSnapshot(q, (snapshot) => {
   messages.innerHTML = "";
   snapshot.forEach((doc) => {
-    messages.innerHTML += `<p>${doc.data().text}</p>`;
+    const data = doc.data();
+
+messages.innerHTML += `
+<div style="margin-bottom:10px">
+  <p>${data.text}</p>
+  <small style="color:gray">${data.createdAt || ""}</small>
+</div>`;
   });
   messages.scrollTop = messages.scrollHeight;
 });
