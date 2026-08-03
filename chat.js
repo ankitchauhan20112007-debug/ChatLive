@@ -25,6 +25,11 @@ const messages = document.getElementById("messages");
 const input = document.getElementById("message");
 const send = document.getElementById("send");
 const emoji = document.getElementById("emoji");
+const darkMode = document.getElementById("darkMode");
+
+darkMode.onclick = () => {
+  document.body.classList.toggle("dark");
+};
 
 emoji.onclick = () => {
   input.value += "😀";
