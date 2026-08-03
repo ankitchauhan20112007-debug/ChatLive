@@ -8,9 +8,9 @@ import {
 import {
   getFirestore,
   collection,
-  getDocs,
   doc,
-  setDoc
+  setDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -36,47 +36,47 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Current user online
   await setDoc(doc(db, "users", user.uid), {
     email: user.email,
     online: true,
     lastSeen: new Date().toISOString()
   }, { merge: true });
 
-  // Load users
-  const snapshot = await getDocs(collection(db, "users"));
+  onSnapshot(collection(db, "users"), (snapshot) => {
 
-  usersDiv.innerHTML = "";
+    usersDiv.innerHTML = "";
 
-  snapshot.forEach((userDoc) => {
+    snapshot.forEach((userDoc) => {
 
-    const data = userDoc.data();
+      const data = userDoc.data();
 
-    if (data.email !== user.email) {
+      if (data.email !== user.email) {
 
-      const div = document.createElement("div");
+        const div = document.createElement("div");
 
-      div.innerHTML = `
-        ${data.online ? "🟢" : "⚪"} ${data.email}
-      `;
+        div.innerHTML = `
+          ${data.online ? "🟢" : "⚪"} ${data.name || data.email}
+        `;
 
-      div.style.padding = "12px";
-      div.style.borderBottom = "1px solid #ddd";
-      div.style.cursor = "pointer";
+        div.style.padding = "12px";
+        div.style.borderBottom = "1px solid #ddd";
+        div.style.cursor = "pointer";
 
-      div.onclick = () => {
-        localStorage.setItem("chatUser", data.email);
-        window.location.href = "chat.html";
-      };
+        div.onclick = () => {
+          localStorage.setItem("chatUser", data.email);
+          window.location.href = "chat.html";
+        };
 
-      usersDiv.appendChild(div);
-    }
+        usersDiv.appendChild(div);
+
+      }
+
+    });
 
   });
 
 });
 
-// Logout
 logoutBtn.onclick = async () => {
 
   const user = auth.currentUser;
@@ -89,12 +89,10 @@ logoutBtn.onclick = async () => {
   }
 
   await signOut(auth);
-
   window.location.href = "index.html";
 
 };
 
-// Browser Close
 window.addEventListener("beforeunload", async () => {
 
   const user = auth.currentUser;
