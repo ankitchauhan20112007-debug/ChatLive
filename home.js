@@ -44,7 +44,9 @@ onAuthStateChanged(auth, async (user) => {
     const data = doc.data();
 
     if (data.email !== user.email) {
-      const div = document.createElement("div");div.innerHTML = data.name || data.email;
+      const div = document.createElement("div");div.innerHTML = `
+${data.online ? "🟢" : "⚪"} ${data.name || data.email}
+`;
 div.style.padding = "12px";
 div.style.borderBottom = "1px solid #ccc";
 div.style.cursor = "pointer";
@@ -62,4 +64,12 @@ usersDiv.appendChild(div);
 logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
-};
+};window.addEventListener("beforeunload", async () => {
+  const user = auth.currentUser;
+
+  if (user) {
+    await setDoc(doc(db, "users", user.uid), {
+      online: false
+    }, { merge: true });
+  }
+});
