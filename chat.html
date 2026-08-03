@@ -5,57 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ChatLive Chat</title>
 
-<style>
-body{
-font-family:Arial,sans-serif;
-background:#2196f3;
-margin:0;
-}
-
-.box{
-width:90%;
-max-width:500px;
-margin:30px auto;
-background:#fff;
-padding:20px;
-border-radius:10px;
-}
-
-#messages{
-height:300px;
-overflow:auto;
-border:1px solid #ccc;
-padding:10px;
-margin-bottom:10px;
-}
-
-input{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#2196f3;
-color:white;
-border:none;
-border-radius:5px;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
 <body>
 
-<div class="box">
+<div class="container">
+
 <h2 id="chatTitle">💬 ChatLive</h2>
+
 <button id="darkMode">🌙 Dark Mode</button>
 
 <div id="messages"></div>
 
 <div class="bottom">
-<button id="emoji">😀</button>
+    <button id="emoji">😀</button>
     <input type="text" id="message" placeholder="Type a message...">
     <button id="send">➤</button>
 </div>
