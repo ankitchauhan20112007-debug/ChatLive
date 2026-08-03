@@ -117,4 +117,20 @@ h2{
     background:#333;
     color:white;
     border:1px solid #555;
+}.navbar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#075E54;
+  padding:12px 0;
+}
+
+.navbar a{
+  color:white;
+  text-decoration:none;
+  font-size:16px;
+  font-weight:bold;
 }
