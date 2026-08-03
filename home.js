@@ -4,6 +4,7 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
@@ -13,7 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
+  apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
   authDomain: "chatlive-bac03.firebaseapp.com",
   projectId: "chatlive-bac03",
   storageBucket: "chatlive-bac03.firebasestorage.app",
@@ -29,42 +30,55 @@ const usersDiv = document.getElementById("users");
 const logoutBtn = document.getElementById("logout");
 
 onAuthStateChanged(auth, async (user) => {
+
   if (!user) {
     window.location.href = "index.html";
     return;
-  }await setDoc(doc(db, "users", user.uid), {
-  email: user.email,
-  online: true
-}, { merge: true });
+  }
 
+  // Current user online
+  await setDoc(doc(db, "users", user.uid), {
+    email: user.email,
+    online: true,
+    lastSeen: new Date().toISOString()
+  }, { merge: true });
+
+  // Load users
   const snapshot = await getDocs(collection(db, "users"));
+
   usersDiv.innerHTML = "";
 
-  snapshot.forEach((doc) => {
-    const data = doc.data();
+  snapshot.forEach((userDoc) => {
+
+    const data = userDoc.data();
 
     if (data.email !== user.email) {
-      const div = document.createElement("div");div.innerHTML = `
-${data.online ? "🟢" : "⚪"} ${data.name || data.email}
-`;
-div.style.padding = "12px";
-div.style.borderBottom = "1px solid #ccc";
-div.style.cursor = "pointer";
 
-div.onclick = () => {
-  localStorage.setItem("chatUser", data.email);
-  window.location.href = "chat.html";
-};
+      const div = document.createElement("div");
 
-usersDiv.appendChild(div);
+      div.innerHTML = `
+        ${data.online ? "🟢" : "⚪"} ${data.email}
+      `;
+
+      div.style.padding = "12px";
+      div.style.borderBottom = "1px solid #ddd";
+      div.style.cursor = "pointer";
+
+      div.onclick = () => {
+        localStorage.setItem("chatUser", data.email);
+        window.location.href = "chat.html";
+      };
+
+      usersDiv.appendChild(div);
     }
+
   });
+
 });
 
+// Logout
 logoutBtn.onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-}window.addEventListener("beforeunload", async () => {
+
   const user = auth.currentUser;
 
   if (user) {
@@ -73,4 +87,23 @@ logoutBtn.onclick = async () => {
       lastSeen: new Date().toISOString()
     }, { merge: true });
   }
+
+  await signOut(auth);
+
+  window.location.href = "index.html";
+
+};
+
+// Browser Close
+window.addEventListener("beforeunload", async () => {
+
+  const user = auth.currentUser;
+
+  if (user) {
+    await setDoc(doc(db, "users", user.uid), {
+      online: false,
+      lastSeen: new Date().toISOString()
+    }, { merge: true });
+  }
+
 });
