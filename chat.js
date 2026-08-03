@@ -24,6 +24,12 @@ const db = getFirestore(app);
 const messages = document.getElementById("messages");
 const input = document.getElementById("message");
 const send = document.getElementById("send");
+const emoji = document.getElementById("emoji");
+
+emoji.onclick = () => {
+  input.value += "😀";
+  input.focus();
+};
 
 send.onclick = async () => {
   if (input.value.trim() === "") return;
