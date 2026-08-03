@@ -64,4 +64,26 @@ h2{
     height:50px;
     font-size:18px;
     cursor:pointer;
+}.dark{
+    background:#121212;
+    color:white;
+}
+
+.dark .container{
+    background:#1e1e1e;
+}
+
+.dark #messages{
+    background:#222;
+}
+
+.dark #messages p{
+    background:#056162;
+    color:white;
+}
+
+.dark #message{
+    background:#333;
+    color:white;
+    border:1px solid #555;
 }
