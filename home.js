@@ -64,16 +64,13 @@ usersDiv.appendChild(div);
 logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
-};window.addEventListener("beforeunload", async () => {
+}window.addEventListener("beforeunload", async () => {
   const user = auth.currentUser;
 
   if (user) {
-   await setDoc(doc(db, "users", user.uid), {
-  email: user.email,
-  online: true,
-  lastSeen: new Date().toISOString()
-}, { merge: true });
-
-alert("Online status updated");
+    await setDoc(doc(db, "users", user.uid), {
+      online: false,
+      lastSeen: new Date().toISOString()
+    }, { merge: true });
   }
 });
