@@ -76,8 +76,23 @@ onAuthStateChanged(auth, async (user) => {
   });
 
 });
-
 logoutBtn.onclick = async () => {
+
+  alert("Logout button clicked");
+
+  const user = auth.currentUser;
+
+  if (user) {
+    await setDoc(doc(db, "users", user.uid), {
+      online: false,
+      lastSeen: new Date().toISOString()
+    }, { merge: true });
+  }
+
+  await signOut(auth);
+
+  window.location.href = "index.html";
+};
 
   const user = auth.currentUser;
 
