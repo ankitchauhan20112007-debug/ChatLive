@@ -32,7 +32,10 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
-  }
+  }await setDoc(doc(db, "users", user.uid), {
+  email: user.email,
+  online: true
+}, { merge: true });
 
   const snapshot = await getDocs(collection(db, "users"));
   usersDiv.innerHTML = "";
