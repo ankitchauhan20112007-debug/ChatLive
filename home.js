@@ -68,8 +68,12 @@ logoutBtn.onclick = async () => {
   const user = auth.currentUser;
 
   if (user) {
-    await setDoc(doc(db, "users", user.uid), {
-      online: false
-    }, { merge: true });
+   await setDoc(doc(db, "users", user.uid), {
+  email: user.email,
+  online: true,
+  lastSeen: new Date().toISOString()
+}, { merge: true });
+
+alert("Online status updated");
   }
 });
