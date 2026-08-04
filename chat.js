@@ -30,6 +30,7 @@ const db = getFirestore(app);
 
 const messages = document.getElementById("messages");
 const message = document.getElementById("message");
+const emojiBtn = document.getElementById("emojiBtn");
 const sendBtn = document.getElementById("sendBtn");
 const chatImage = document.getElementById("chatImage");
 const sendImage = document.getElementById("sendImage");
@@ -146,4 +147,12 @@ display:block;
 
   messages.scrollTop = messages.scrollHeight;
 
-});
+});emojiBtn.onclick = () => {
+
+  const emoji = prompt("Emoji 😊");
+
+  if (emoji) {
+    message.value += emoji;
+  }
+
+};
