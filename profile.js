@@ -80,9 +80,12 @@ uploadBtn.onclick = async () => {
 
   profilePic.src = data.secure_url;
 
-  await updateDoc(doc(db, "users", auth.currentUser.uid), {
+ await setDoc(
+  doc(db, "users", auth.currentUser.uid),
+  {
     photo: data.secure_url
-  });
-
+  },
+  { merge: true }
+);
   alert("Profile photo uploaded successfully!");
 };
