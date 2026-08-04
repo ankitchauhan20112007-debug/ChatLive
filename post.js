@@ -35,7 +35,7 @@ const posts = document.getElementById("posts");
 postBtn.onclick = async () => {
 
   if (!postImage.files[0]) {
-    alert("Please select an image");
+    alert("Please select image");
     return;
   }
 
@@ -43,7 +43,7 @@ postBtn.onclick = async () => {
   formData.append("file", postImage.files[0]);
   formData.append("upload_preset", "swlqxqgn");
 
-  const res = await fetch(
+  const upload = await fetch(
     "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
     {
       method: "POST",
@@ -51,23 +51,27 @@ postBtn.onclick = async () => {
     }
   );
 
-  const data = await res.json();
+  const image = await upload.json();
+
+  if (!image.secure_url) {
+    alert("Upload Failed");
+    return;
+  }
 
   await addDoc(collection(db, "posts"), {
-    image: data.secure_url,
+    image: image.secure_url,
     caption: caption.value,
     email: auth.currentUser.email,
-likes: 0,
+    likes: 0,
     time: serverTimestamp()
   });
 
-  caption.value = "";
   postImage.value = "";
+  caption.value = "";
 
-  alert("Post Uploaded!");
-};
+  alert("Post Uploaded");
 
-const q = query(
+};const q = query(
   collection(db, "posts"),
   orderBy("time", "desc")
 );
@@ -76,11 +80,12 @@ onSnapshot(q, (snapshot) => {
 
   posts.innerHTML = "";
 
-  snapshot.forEach((doc) => {
+  snapshot.forEach((post) => {
 
-    const data = doc.data();
+    const data = post.data();
 
-   posts.innerHTML += `
+    posts.innerHTML += `
+
 <div style="
 background:#fff;
 margin:15px 0;
@@ -95,25 +100,26 @@ align-items:center;
 padding:12px;
 ">
 
-<img src="${data.image}"
-style="
+<div style="
 width:45px;
 height:45px;
 border-radius:50%;
-object-fit:cover;
+background:#ddd;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:20px;
 margin-right:10px;
 ">
+👤
+</div>
 
 <div>
-
 <b>${data.email}</b>
-
 <br>
-
 <small style="color:gray;">
 ChatLive
 </small>
-
 </div>
 
 </div>
@@ -129,18 +135,22 @@ object-fit:cover;
 
 <div style="padding:12px;">
 
-<div style="font-size:24px;">
-❤️ 🤍 💬 📤
+<div style="
+font-size:24px;
+margin-bottom:10px;
+">
+❤️ ${data.likes || 0}
 </div>
 
-<p style="margin-top:10px;">
-<b>${data.email}</b>
+<p>
+<b>${data.email}</b><br>
 ${data.caption}
 </p>
 
 </div>
 
 </div>
+
 `;
 
   });
