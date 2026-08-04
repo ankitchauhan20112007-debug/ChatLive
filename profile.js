@@ -1,16 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 import {
   getFirestore,
   doc,
   getDoc,
-  updateDoc
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -28,11 +28,10 @@ const db = getFirestore(app);
 
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
-const logout = document.getElementById("logout");
-
+const profilePic = document.getElementById("profilePic");
 const profileImage = document.getElementById("profileImage");
 const uploadBtn = document.getElementById("uploadBtn");
-const profilePic = document.getElementById("profilePic");
+const logout = document.getElementById("logout");
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -52,40 +51,55 @@ onAuthStateChanged(auth, async (user) => {
 
 });
 
-logout.onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-
 uploadBtn.onclick = async () => {
 
-  if (!profileImage.files[0]) {
+  if (!profileImage.files.length) {
     alert("Please select an image");
     return;
   }
 
-  const formData = new FormData();
-  formData.append("file", profileImage.files[0]);
-  formData.append("upload_preset", "swlqxqgn");
+  try {
 
-  const res = await fetch(
-    "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
-    {
-      method: "POST",
-      body: formData
+    const formData = new FormData();
+    formData.append("file", profileImage.files[0]);
+    formData.append("upload_preset", "swlqxqgn");
+
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.secure_url) {
+      alert("Upload Failed");
+      console.log(data);
+      return;
     }
-  );
 
-  const data = await res.json();
+    profilePic.src = data.secure_url;
 
-  profilePic.src = data.secure_url;
+    await setDoc(
+      doc(db, "users", auth.currentUser.uid),
+      {
+        photo: data.secure_url
+      },
+      { merge: true }
+    );
 
- await setDoc(
-  doc(db, "users", auth.currentUser.uid),
-  {
-    photo: data.secure_url
-  },
-  { merge: true }
-);
-  alert("Profile photo uploaded successfully!");
+    alert("Profile photo uploaded successfully!");
+
+  } catch (err) {
+    console.log(err);
+    alert(err.message);
+  }
+
+};
+
+logout.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
 };
