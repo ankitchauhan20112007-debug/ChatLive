@@ -1,65 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
-<title>ChatLive Chat</title>
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-<link rel="stylesheet" href="style.css">
+const firebaseConfig = {
+  apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
+  authDomain: "chatlive-bac03.firebaseapp.com",
+  projectId: "chatlive-bac03",
+  storageBucket: "chatlive-bac03.firebasestorage.app",
+  messagingSenderId: "1097708548558",
+  appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
+};
 
-</head>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-<body>
+const usersDiv = document.getElementById("users");
 
-<div class="container">
+onAuthStateChanged(auth, async (user) => {
 
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  await setDoc(doc(db, "users", user.uid), {
+    email: user.email,
+    online: true
+  }, { merge: true });
+
+  onSnapshot(collection(db, "users"), (snapshot) => {
+
+    usersDiv.innerHTML = "";
+
+    snapshot.forEach((userDoc) => {
+
+      const data = userDoc.data();
+
+      if (data.email !== user.email) {
+
+        usersDiv.innerHTML += `
 <div class="card">
 
-<h2>💬 ChatLive Chat</h2>
+<h3>${data.name || data.email}</h3>
 
-<div id="chatUser"
-style="font-weight:bold;margin-bottom:10px;">
-Loading...
-</div>
+<p class="${data.online ? "online" : "offline"}">
 
-<div id="messages"
-style="
-height:400px;
-overflow-y:auto;
-background:#f5f5f5;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-">
-</div>
+${data.online ? "🟢 Online" : "⚪ Offline"}
 
-<div style="display:flex;gap:10px;">
-
-<input
-type="text"
-id="message"
-placeholder="Type a message...">
-
-<button id="sendBtn">
-Send
-</button>
+</p>
 
 </div>
+`;
 
-</div>
+      }
 
-</div>
+    });
 
-<div class="navbar">
-<a href="home.html">🏠</a>
-<a href="post.html">📸</a>
-<a href="chat.html">💬</a>
-<a href="profile.html">👤</a>
-</div>
+  });
 
-<script type="module" src="chat.js"></script>
+});window.addEventListener("beforeunload", async () => {
 
-</body>
-</html>
+  const user = auth.currentUser;
+
+  if (user) {
+    await setDoc(doc(db, "users", user.uid), {
+      online: false
+    }, { merge: true });
+  }
+
+});
+
+document.addEventListener("visibilitychange", async () => {
+
+  const user = auth.currentUser;
+
+  if (!user) return;
+
+  if (document.hidden) {
+
+    await setDoc(doc(db, "users", user.uid), {
+      online: false
+    }, { merge: true });
+
+  } else {
+
+    await setDoc(doc(db, "users", user.uid), {
+      online: true
+    }, { merge: true });
+
+  }
+
+});
