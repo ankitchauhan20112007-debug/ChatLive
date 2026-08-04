@@ -1,4 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
 import {
   getFirestore,
   collection,
@@ -19,50 +25,84 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 const messages = document.getElementById("messages");
-const input = document.getElementById("message");
-const send = document.getElementById("send");
-const emoji = document.getElementById("emoji");
-const darkMode = document.getElementById("darkMode");
+const message = document.getElementById("message");
+const sendBtn = document.getElementById("sendBtn");
+const chatUser = document.getElementById("chatUser");
 
-darkMode.onclick = () => {
-  document.body.classList.toggle("dark");
-};
+const chatWith = localStorage.getItem("chatUser");
 
-emoji.onclick = () => {
-  input.value += "😀";
-  input.focus();
-};
+chatUser.innerHTML = "💬 " + chatWith;
 
-send.onclick = async () => {
-  if (input.value.trim() === "") return;
+onAuthStateChanged(auth, (user) => {
 
- await addDoc(collection(db, "messages"), {
-  text: input.value,
-  time: serverTimestamp(),
-  createdAt: new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  })
-});
+  if (!user) {
+    location.href = "index.html";
+    return;
+  }
 
-  input.value = "";
-};
+  sendBtn.onclick = async () => {
 
-const q = query(collection(db, "messages"), orderBy("time"));
+    if (message.value.trim() == "") return;
+
+    await addDoc(collection(db, "messages"), {
+      from: user.email,
+      to: chatWith,
+      text: message.value,
+      time: serverTimestamp()
+    });
+
+    message.value = "";
+
+  };
+
+});const q = query(
+  collection(db, "messages"),
+  orderBy("time", "asc")
+);
 
 onSnapshot(q, (snapshot) => {
+
   messages.innerHTML = "";
+
   snapshot.forEach((doc) => {
+
     const data = doc.data();
 
-messages.innerHTML += `
-<div style="margin-bottom:10px">
-  <p>${data.text}</p>
-  <small style="color:gray">${data.createdAt || ""}</small>
-</div>`;
+    if (
+      (data.from === auth.currentUser.email && data.to === chatWith) ||
+      (data.from === chatWith && data.to === auth.currentUser.email)
+    ) {
+
+      const mine = data.from === auth.currentUser.email;
+
+      messages.innerHTML += `
+      <div style="
+      display:flex;
+      justify-content:${mine ? "flex-end" : "flex-start"};
+      margin:8px 0;
+      ">
+
+        <div style="
+        background:${mine ? "#0095f6" : "#e5e5ea"};
+        color:${mine ? "#fff" : "#000"};
+        padding:10px 15px;
+        border-radius:18px;
+        max-width:70%;
+        word-wrap:break-word;
+        ">
+          ${data.text}
+        </div>
+
+      </div>
+      `;
+    }
+
   });
+
   messages.scrollTop = messages.scrollHeight;
+
 });
