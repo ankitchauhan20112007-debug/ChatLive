@@ -57,6 +57,7 @@ postBtn.onclick = async () => {
     image: data.secure_url,
     caption: caption.value,
     email: auth.currentUser.email,
+likes: 0,
     time: serverTimestamp()
   });
 
