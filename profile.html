@@ -15,29 +15,44 @@
 <h2>👤 My Profile</h2>
 
 <div style="text-align:center;padding:20px;">
-    <img id="profilePic"
-         src="https://via.placeholder.com/120"
-         width="120"
-         height="120"
-         style="border-radius:50%;"><input type="file" id="profileImage" accept="image/*">
+
+<img
+id="profilePic"
+src="https://via.placeholder.com/150"
+width="120"
+height="120"
+style="border-radius:50%;object-fit:cover;">
 
 <br><br>
 
-<button id="uploadBtn">📷 Upload Profile Photo</button>
+<input
+type="file"
+id="profileImage"
+accept="image/*">
 
 <br><br>
 
-    <h3 id="userName">Loading...</h3>
-    <p id="userEmail">Loading...</p>
+<button id="uploadBtn">
+Upload Photo
+</button>
 
-    <button id="logout">Logout</button>
+<h3 id="userName">Loading...</h3>
+
+<p id="userEmail">Loading...</p>
+
+<br>
+
+<button id="logout">
+Logout
+</button>
+
 </div>
 
 <div class="navbar">
-  <a href="home.html">🏠 Home</a>
-  <a href="chat.html">💬 Chat</a>
-  <a href="post.html">📸 Posts</a>
-  <a href="profile.html">👤 Profile</a>
+<a href="home.html">🏠 Home</a>
+<a href="chat.html">💬 Chat</a>
+<a href="post.html">📸 Posts</a>
+<a href="profile.html">👤 Profile</a>
 </div>
 
 <script type="module" src="profile.js"></script>
