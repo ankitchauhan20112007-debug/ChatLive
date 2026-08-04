@@ -31,6 +31,8 @@ const db = getFirestore(app);
 const messages = document.getElementById("messages");
 const message = document.getElementById("message");
 const sendBtn = document.getElementById("sendBtn");
+const chatImage = document.getElementById("chatImage");
+const sendImage = document.getElementById("sendImage");
 const chatUser = document.getElementById("chatUser");
 
 const chatWith = localStorage.getItem("chatUser");
@@ -45,6 +47,38 @@ onAuthStateChanged(auth, (user) => {
   }
 
   sendBtn.onclick = async () => {
+sendImage.onclick = async () => {
+
+  if (!chatImage.files[0]) {
+    alert("Please select image");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", chatImage.files[0]);
+  formData.append("upload_preset", "swlqxqgn");
+
+  const upload = await fetch(
+    "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  const img = await upload.json();
+
+  await addDoc(collection(db, "messages"), {
+    from: auth.currentUser.email,
+    to: chatWith,
+    image: img.secure_url,
+    text: "",
+    time: serverTimestamp()
+  });
+
+  chatImage.value = "";
+
+};
 
     if (message.value.trim() == "") return;
 
