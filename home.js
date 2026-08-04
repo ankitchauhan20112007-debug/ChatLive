@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
 import {
   getAuth,
   onAuthStateChanged,
@@ -27,7 +28,6 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const usersDiv = document.getElementById("users");
-const logoutBtn = document.getElementById("logout");
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -38,8 +38,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await setDoc(doc(db, "users", user.uid), {
     email: user.email,
-    online: true,
-    lastSeen: new Date().toISOString()
+    online: true
   }, { merge: true });
 
   onSnapshot(collection(db, "users"), (snapshot) => {
@@ -52,71 +51,24 @@ onAuthStateChanged(auth, async (user) => {
 
       if (data.email !== user.email) {
 
-        const div = document.createElement("div");
+        usersDiv.innerHTML += `
+<div class="card">
 
-        div.innerHTML = `
-          ${data.online ? "🟢" : "⚪"} ${data.name || data.email}
-        `;
+<h3>${data.name || data.email}</h3>
 
-        div.style.padding = "12px";
-        div.style.borderBottom = "1px solid #ddd";
-        div.style.cursor = "pointer";
+<p class="${data.online ? "online" : "offline"}">
 
-        div.onclick = () => {
-          localStorage.setItem("chatUser", data.email);
-          window.location.href = "chat.html";
-        };
+${data.online ? "🟢 Online" : "⚪ Offline"}
 
-        usersDiv.appendChild(div);
+</p>
+
+</div>
+`;
 
       }
 
     });
 
   });
-
-});
-logoutBtn.onclick = async () => {
-
-  alert("Logout button clicked");
-
-  const user = auth.currentUser;
-
-  if (user) {
-    await setDoc(doc(db, "users", user.uid), {
-      online: false,
-      lastSeen: new Date().toISOString()
-    }, { merge: true });
-  }
-
-  await signOut(auth);
-
-  window.location.href = "index.html";
-};
-
-  const user = auth.currentUser;
-
-  if (user) {
-    await setDoc(doc(db, "users", user.uid), {
-      online: false,
-      lastSeen: new Date().toISOString()
-    }, { merge: true });
-  }
-
-  await signOut(auth);
-  window.location.href = "index.html";
-
-};
-
-window.addEventListener("beforeunload", async () => {
-
-  const user = auth.currentUser;
-
-  if (user) {
-    await setDoc(doc(db, "users", user.uid), {
-      online: false,
-      lastSeen: new Date().toISOString()
-    }, { merge: true });
-  }
 
 });
