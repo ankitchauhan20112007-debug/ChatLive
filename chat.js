@@ -128,7 +128,14 @@ onSnapshot(q, (snapshot) => {
         max-width:70%;
         word-wrap:break-word;
         ">
-          ${data.text}
+          ${data.image
+? `<img src="${data.image}"
+style="
+max-width:220px;
+border-radius:12px;
+display:block;
+">`
+: data.text}
         </div>
 
       </div>
