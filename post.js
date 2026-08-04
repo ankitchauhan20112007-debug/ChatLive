@@ -167,4 +167,18 @@ ${data.caption}
 
   });
 
-});
+});window.likePost = async (postId) => {
+  try {
+
+    await updateDoc(
+      doc(db, "posts", postId),
+      {
+        likes: increment(1)
+      }
+    );
+
+  } catch (err) {
+    console.log(err);
+    alert("Like failed");
+  }
+};
