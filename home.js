@@ -71,4 +71,36 @@ ${data.online ? "🟢 Online" : "⚪ Offline"}
 
   });
 
+});window.addEventListener("beforeunload", async () => {
+
+  const user = auth.currentUser;
+
+  if (user) {
+    await setDoc(doc(db, "users", user.uid), {
+      online: false
+    }, { merge: true });
+  }
+
+});
+
+document.addEventListener("visibilitychange", async () => {
+
+  const user = auth.currentUser;
+
+  if (!user) return;
+
+  if (document.hidden) {
+
+    await setDoc(doc(db, "users", user.uid), {
+      online: false
+    }, { merge: true });
+
+  } else {
+
+    await setDoc(doc(db, "users", user.uid), {
+      online: true
+    }, { merge: true });
+
+  }
+
 });
