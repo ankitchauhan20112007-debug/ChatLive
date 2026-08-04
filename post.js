@@ -7,7 +7,10 @@ import {
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 import {
@@ -139,7 +142,16 @@ object-fit:cover;
 font-size:24px;
 margin-bottom:10px;
 ">
+<button
+onclick="likePost('${post.id}')"
+style="
+background:none;
+border:none;
+font-size:20px;
+cursor:pointer;
+">
 ❤️ ${data.likes || 0}
+</button>
 </div>
 
 <p>
