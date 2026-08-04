@@ -54,11 +54,45 @@ onAuthStateChanged(auth, async (user) => {
   }
 
 });
-
 uploadBtn.onclick = async () => {
+  try {
+    if (!profileImage.files[0]) {
+      alert("Please select an image");
+      return;
+    }
 
-  if (!profileImage.files.length) {
-    alert("Please select an image");
+    const formData = new FormData();
+    formData.append("file", profileImage.files[0]);
+    formData.append("upload_preset", "swlqxqgn");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await res.json();
+    console.log(data);
+    alert(JSON.stringify(data));
+
+    profilePic.src = data.secure_url;
+
+    await setDoc(
+      doc(db, "users", auth.currentUser.uid),
+      {
+        photo: data.secure_url
+      },
+      { merge: true }
+    );
+
+    alert("Photo saved to Firestore");
+  } catch (e) {
+    alert("Error: " + e.message);
+    console.error(e);
+  }
+};
     return;
   }
 
