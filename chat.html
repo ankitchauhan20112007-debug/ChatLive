@@ -1,29 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ChatLive Chat</title>
 
 <link rel="stylesheet" href="style.css">
 
 </head>
+
 <body>
 
 <div class="container">
 
-<h2 id="chatTitle">💬 ChatLive</h2>
+<div class="card">
 
-<button id="darkMode">🌙 Dark Mode</button>
+<h2>💬 ChatLive Chat</h2>
 
-<div id="messages"></div>
-
-<div class="bottom">
-    <button id="emoji">😀</button>
-    <input type="text" id="message" placeholder="Type a message...">
-    <button id="send">➤</button>
+<div id="chatUser"
+style="font-weight:bold;margin-bottom:10px;">
+Loading...
 </div>
 
+<div id="messages"
+style="
+height:400px;
+overflow-y:auto;
+background:#f5f5f5;
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+">
+</div>
+
+<div style="display:flex;gap:10px;">
+
+<input
+type="text"
+id="message"
+placeholder="Type a message...">
+
+<button id="sendBtn">
+Send
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="navbar">
+<a href="home.html">🏠</a>
+<a href="post.html">📸</a>
+<a href="chat.html">💬</a>
+<a href="profile.html">👤</a>
 </div>
 
 <script type="module" src="chat.js"></script>
