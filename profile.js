@@ -3,7 +3,9 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";import {
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+import {
   getFirestore,
   doc,
   getDoc,
@@ -22,13 +24,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
-const logout = document.getElementById("logout");const profileImage = document.getElementById("profileImage");
+const logout = document.getElementById("logout");
+
+const profileImage = document.getElementById("profileImage");
 const uploadBtn = document.getElementById("uploadBtn");
 const profilePic = document.getElementById("profilePic");
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     window.location.href = "index.html";
@@ -38,12 +43,20 @@ onAuthStateChanged(auth, (user) => {
   userName.textContent = user.displayName || "ChatLive User";
   userEmail.textContent = user.email;
 
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  if (snap.exists() && snap.data().photo) {
+    profilePic.src = snap.data().photo;
+  }
+
 });
 
 logout.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
-};uploadBtn.onclick = async () => {
+};
+
+uploadBtn.onclick = async () => {
 
   if (!profileImage.files[0]) {
     alert("Please select an image");
@@ -66,5 +79,9 @@ logout.onclick = async () => {
 
   profilePic.src = data.secure_url;
 
-  alert("Photo uploaded successfully!");
+  await updateDoc(doc(db, "users", auth.currentUser.uid), {
+    photo: data.secure_url
+  });
+
+  alert("Profile photo uploaded successfully!");
 };
