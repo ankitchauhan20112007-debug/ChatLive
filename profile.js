@@ -53,4 +53,53 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 
-});
+});uploadBtn.onclick = async () => {
+  try {
+
+    if (!profileImage.files[0]) {
+      alert("Please select an image");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", profileImage.files[0]);
+    formData.append("upload_preset", "swlqxqgn");
+
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.secure_url) {
+      alert("Upload Failed");
+      console.log(data);
+      return;
+    }
+
+    profilePic.src = data.secure_url;
+
+    await setDoc(
+      doc(db, "users", auth.currentUser.uid),
+      {
+        photo: data.secure_url
+      },
+      { merge: true }
+    );
+
+    alert("Profile photo uploaded successfully!");
+
+  } catch (err) {
+    console.log(err);
+    alert("Error: " + err.message);
+  }
+};
+
+logout.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
