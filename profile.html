@@ -1,61 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile - ChatLive</title>
+
+<title>ChatLive Posts</title>
 
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>👤 My Profile</h2>
+<h2>📸 ChatLive Posts</h2>
 
-<div style="text-align:center;padding:20px;">
-
-<img
-id="profilePic"
-src="https://via.placeholder.com/150"
-width="120"
-height="120"
-style="border-radius:50%;object-fit:cover;">
+<input type="file" id="postImage" accept="image/*">
 
 <br><br>
 
 <input
-type="file"
-id="profileImage"
-accept="image/*">
+id="caption"
+placeholder="Write a caption...">
 
 <br><br>
 
-<button id="uploadBtn">
-Upload Photo
+<button id="postBtn">
+Share Post
 </button>
 
-<h3 id="userName">Loading...</h3>
+<hr>
 
-<p id="userEmail">Loading...</p>
-
-<br>
-
-<button id="logout">
-Logout
-</button>
+<div id="posts"></div>
 
 </div>
 
-<div class="navbar">
-<a href="home.html">🏠 Home</a>
-<a href="chat.html">💬 Chat</a>
-<a href="post.html">📸 Posts</a>
-<a href="profile.html">👤 Profile</a>
-</div>
-
-<script type="module" src="profile.js"></script>
+<script type="module" src="post.js"></script>
 
 </body>
 </html>
