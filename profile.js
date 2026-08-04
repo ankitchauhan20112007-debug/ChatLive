@@ -21,7 +21,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
+const db = getFirestore(app);
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const logout = document.getElementById("logout");const profileImage = document.getElementById("profileImage");
