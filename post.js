@@ -24,11 +24,7 @@ const firebaseConfig = {
   storageBucket: "chatlive-bac03.firebasestorage.app",
   messagingSenderId: "1097708548558",
   appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+};import { auth, db } from "./firebase.js";
 
 const postImage = document.getElementById("postImage");
 const caption = document.getElementById("caption");
