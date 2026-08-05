@@ -26,6 +26,11 @@ onSnapshot(q, (snapshot) => {
   });
 
   if (stories.length > 0) {
+const savedStory = localStorage.getItem("storyImage");
+
+if (savedStory) {
+  storyImg.src = savedStory;
+}
     storyImg.src = stories[0].image;
   }
 
