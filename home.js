@@ -119,7 +119,11 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
       class="post-image">
 
       <div class="post-actions">
-        ❤️ 💬 📤
+        <button onclick="likePost('${post.id}')">
+❤️ ${data.likes || 0}
+</button>
+
+💬 📤
       </div>
 
       <div class="post-caption">
