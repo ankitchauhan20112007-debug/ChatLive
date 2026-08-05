@@ -120,14 +120,16 @@ onSnapshot(collection(db, "stories"), (snapshot) => {
     storiesDiv.innerHTML += `
       <div class="story">
         <img
-          src="${data.image}"
-          style="
-            width:65px;
-            height:65px;
-            border-radius:50%;
-            object-fit:cover;
-            border:3px solid #ff0066;
-          ">
+onclick="openStory('${data.image}')"
+src="${data.image}"
+style="
+width:65px;
+height:65px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #ff0066;
+cursor:pointer;
+">
         <p style="font-size:12px">${data.email.split("@")[0]}</p>
       </div>
     `;
@@ -185,5 +187,11 @@ onSnapshot(collection(db, "stories"), (snapshot) => {
   } catch (e) {
     console.log(e);
   }
+
+};window.openStory = (image) => {
+
+  localStorage.setItem("storyImage", image);
+
+  window.location.href = "viewer.html";
 
 };
