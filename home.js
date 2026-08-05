@@ -9,7 +9,9 @@ import {
   collection,
   doc,
   setDoc,
-  onSnapshot
+  onSnapshot,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const usersDiv = document.getElementById("users");
@@ -130,4 +132,19 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
 
   });
 
-});
+});window.likePost = async (id) => {
+
+  try {
+
+    await updateDoc(
+      doc(db, "posts", id),
+      {
+        likes: increment(1)
+      }
+    );
+
+  } catch (e) {
+    console.log(e);
+  }
+
+};
