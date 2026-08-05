@@ -95,4 +95,39 @@ document.addEventListener("visibilitychange", async () => {
 
   window.location.href = "index.html";
 
-};
+};const feed = document.getElementById("feed");
+
+onSnapshot(collection(db, "posts"), (snapshot) => {
+
+  feed.innerHTML = "";
+
+  snapshot.forEach((post) => {
+
+    const data = post.data();
+
+    feed.innerHTML += `
+    <div class="post-card">
+
+      <div class="post-header">
+        <b>${data.email}</b>
+      </div>
+
+      <img
+      src="${data.image}"
+      class="post-image">
+
+      <div class="post-actions">
+        ❤️ 💬 📤
+      </div>
+
+      <div class="post-caption">
+        <b>${data.email}</b><br>
+        ${data.caption || ""}
+      </div>
+
+    </div>
+    `;
+
+  });
+
+});
