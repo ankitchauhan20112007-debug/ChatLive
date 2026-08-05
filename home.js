@@ -13,6 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const usersDiv = document.getElementById("users");
+const logoutBtn = document.getElementById("logoutBtn");
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -88,4 +89,10 @@ document.addEventListener("visibilitychange", async () => {
 
   }
 
-});
+});logoutBtn.onclick = async () => {
+
+  await signOut(auth);
+
+  window.location.href = "index.html";
+
+};
