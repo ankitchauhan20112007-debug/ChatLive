@@ -1,7 +1,4 @@
-
-
 import {
-  getFirestore,
   collection,
   addDoc,
   onSnapshot,
