@@ -1,12 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { auth, db } from "./firebase.js";
 
 import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
-import {
-  getFirestore,
   collection,
   addDoc,
   query,
@@ -15,18 +9,9 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
-  authDomain: "chatlive-bac03.firebaseapp.com",
-  projectId: "chatlive-bac03",
-  storageBucket: "chatlive-bac03.firebasestorage.app",
-  messagingSenderId: "1097708548558",
-  appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 const messages = document.getElementById("messages");
 const message = document.getElementById("message");
@@ -47,7 +32,21 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  sendBtn.onclick = async () => {
+});sendBtn.onclick = async () => {
+
+  if (message.value.trim() == "") return;
+
+  await addDoc(collection(db, "messages"), {
+    from: user.email,
+    to: chatWith,
+    text: message.value,
+    time: serverTimestamp()
+  });
+
+  message.value = "";
+
+};
+
 sendImage.onclick = async () => {
 
   if (!chatImage.files[0]) {
@@ -69,8 +68,13 @@ sendImage.onclick = async () => {
 
   const img = await upload.json();
 
+  if (!img.secure_url) {
+    alert("Image upload failed");
+    return;
+  }
+
   await addDoc(collection(db, "messages"), {
-    from: auth.currentUser.email,
+    from: user.email,
     to: chatWith,
     image: img.secure_url,
     text: "",
@@ -78,23 +82,7 @@ sendImage.onclick = async () => {
   });
 
   chatImage.value = "";
-
-};
-
-    if (message.value.trim() == "") return;
-
-    await addDoc(collection(db, "messages"), {
-      from: user.email,
-      to: chatWith,
-      text: message.value,
-      time: serverTimestamp()
-    });
-
-    message.value = "";
-
-  };
-
-});const q = query(
+};const q = query(
   collection(db, "messages"),
   orderBy("time", "asc")
 );
@@ -103,9 +91,9 @@ onSnapshot(q, (snapshot) => {
 
   messages.innerHTML = "";
 
-  snapshot.forEach((doc) => {
+  snapshot.forEach((msg) => {
 
-    const data = doc.data();
+    const data = msg.data();
 
     if (
       (data.from === auth.currentUser.email && data.to === chatWith) ||
@@ -116,29 +104,27 @@ onSnapshot(q, (snapshot) => {
 
       messages.innerHTML += `
       <div style="
-      display:flex;
-      justify-content:${mine ? "flex-end" : "flex-start"};
-      margin:8px 0;
+        display:flex;
+        justify-content:${mine ? "flex-end" : "flex-start"};
+        margin:8px 0;
       ">
-
         <div style="
-        background:${mine ? "#0095f6" : "#e5e5ea"};
-        color:${mine ? "#fff" : "#000"};
-        padding:10px 15px;
-        border-radius:18px;
-        max-width:70%;
-        word-wrap:break-word;
+          background:${mine ? "#0095f6" : "#e5e5ea"};
+          color:${mine ? "#fff" : "#000"};
+          padding:10px;
+          border-radius:15px;
+          max-width:75%;
         ">
-          ${data.image
-? `<img src="${data.image}"
-style="
-max-width:220px;
-border-radius:12px;
-display:block;
-">`
-: data.text}
-        </div>
 
+        ${
+          data.image
+            ? `<img src="${data.image}" style="max-width:220px;border-radius:10px;display:block;">`
+            : ""
+        }
+
+        ${data.text || ""}
+
+        </div>
       </div>
       `;
     }
@@ -147,9 +133,11 @@ display:block;
 
   messages.scrollTop = messages.scrollHeight;
 
-});emojiBtn.onclick = () => {
+});
 
-  const emoji = prompt("Emoji 😊");
+emojiBtn.onclick = () => {
+
+  const emoji = prompt("Enter Emoji 😊");
 
   if (emoji) {
     message.value += emoji;
