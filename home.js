@@ -100,6 +100,41 @@ document.addEventListener("visibilitychange", async () => {
 };const feed = document.getElementById("feed");
 
 onSnapshot(collection(db, "posts"), (snapshot) => {
+const storiesDiv = document.getElementById("stories");
+
+onSnapshot(collection(db, "stories"), (snapshot) => {
+
+  storiesDiv.innerHTML = `
+    <div class="story">
+      <a href="stories.html" style="text-decoration:none;color:black">
+        <div class="story-ring">➕</div>
+        <p>Your Story</p>
+      </a>
+    </div>
+  `;
+
+  snapshot.forEach((story) => {
+
+    const data = story.data();
+
+    storiesDiv.innerHTML += `
+      <div class="story">
+        <img
+          src="${data.image}"
+          style="
+            width:65px;
+            height:65px;
+            border-radius:50%;
+            object-fit:cover;
+            border:3px solid #ff0066;
+          ">
+        <p style="font-size:12px">${data.email.split("@")[0]}</p>
+      </div>
+    `;
+
+  });
+
+});
 
   feed.innerHTML = "";
 
