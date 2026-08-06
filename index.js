@@ -1,3 +1,4 @@
+alert("index.js loaded");
 import { auth, db } from "./firebase.js";
 
 import {
