@@ -15,9 +15,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const usersDiv = document.getElementById("users");
-const logoutBtn = document.getElementById("logoutBtn");
-
-onAuthStateChanged(auth, async (user) => {
+const storiesDiv = document.getElementById("stories");
+const feed = document.getElementById("feed");
+const logoutBtn = document.getElementById("logoutBtn");onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     window.location.href = "index.html";
@@ -29,114 +29,45 @@ onAuthStateChanged(auth, async (user) => {
     online: true
   }, { merge: true });
 
-  onSnapshot(collection(db, "users"), (snapshot) => {
+  // Stories
+  onSnapshot(collection(db, "stories"), (snapshot) => {
 
-    usersDiv.innerHTML = "";
+    storiesDiv.innerHTML = `
+      <div class="story">
+        <a href="stories.html" style="text-decoration:none;color:black">
+          <div class="story-ring">➕</div>
+          <p>Your Story</p>
+        </a>
+      </div>
+    `;
 
-    snapshot.forEach((userDoc) => {
+    snapshot.forEach((story) => {
 
-      const data = userDoc.data();
+      const data = story.data();
 
-      if (data.email !== user.email) {
-
-        usersDiv.innerHTML += `
-<div class="card">
-
-<h3>${data.name || data.email}</h3>
-
-<p class="${data.online ? "online" : "offline"}">
-
-${data.online ? "🟢 Online" : "⚪ Offline"}
-
-</p>
-
-</div>
-`;
-
-      }
+      storiesDiv.innerHTML += `
+      <div class="story">
+        <img
+        src="${data.image}"
+        onclick="openStory('${data.image}')"
+        style="
+        width:65px;
+        height:65px;
+        border-radius:50%;
+        object-fit:cover;
+        border:3px solid #ff0066;
+        cursor:pointer;
+        ">
+        <p>${data.email.split("@")[0]}</p>
+      </div>
+      `;
 
     });
 
   });
 
-});window.addEventListener("beforeunload", async () => {
-
-  const user = auth.currentUser;
-
-  if (user) {
-    await setDoc(doc(db, "users", user.uid), {
-      online: false
-    }, { merge: true });
-  }
-
-});
-
-document.addEventListener("visibilitychange", async () => {
-
-  const user = auth.currentUser;
-
-  if (!user) return;
-
-  if (document.hidden) {
-
-    await setDoc(doc(db, "users", user.uid), {
-      online: false
-    }, { merge: true });
-
-  } else {
-
-    await setDoc(doc(db, "users", user.uid), {
-      online: true
-    }, { merge: true });
-
-  }
-
-});logoutBtn.onclick = async () => {
-
-  await signOut(auth);
-
-  window.location.href = "index.html";
-
-};const feed = document.getElementById("feed");
-
+});// Feed
 onSnapshot(collection(db, "posts"), (snapshot) => {
-const storiesDiv = document.getElementById("stories");
-
-onSnapshot(collection(db, "stories"), (snapshot) => {
-
-  storiesDiv.innerHTML = `
-    <div class="story">
-      <a href="stories.html" style="text-decoration:none;color:black">
-        <div class="story-ring">➕</div>
-        <p>Your Story</p>
-      </a>
-    </div>
-  `;
-
-  snapshot.forEach((story) => {
-
-    const data = story.data();
-
-    storiesDiv.innerHTML += `
-      <div class="story">
-        <img
-onclick="openStory('${data.image}')"
-src="${data.image}"
-style="
-width:65px;
-height:65px;
-border-radius:50%;
-object-fit:cover;
-border:3px solid #ff0066;
-cursor:pointer;
-">
-        <p style="font-size:12px">${data.email.split("@")[0]}</p>
-      </div>
-    `;
-
-  });
-
-});
 
   feed.innerHTML = "";
 
@@ -145,53 +76,61 @@ cursor:pointer;
     const data = post.data();
 
     feed.innerHTML += `
-    <div class="post-card">
+      <div class="post-card">
 
-      <div class="post-header">
-        <b>${data.email}</b>
+        <div class="post-header">
+          <b>${data.email}</b>
+        </div>
+
+        <img
+        src="${data.image}"
+        class="post-image">
+
+        <div class="post-actions">
+          <button onclick="likePost('${post.id}')">
+            ❤️ ${data.likes || 0}
+          </button>
+          💬 📤
+        </div>
+
+        <div class="post-caption">
+          <b>${data.email}</b><br>
+          ${data.caption || ""}
+        </div>
+
       </div>
-
-      <img
-      src="${data.image}"
-      class="post-image">
-
-      <div class="post-actions">
-        <button onclick="likePost('${post.id}')">
-❤️ ${data.likes || 0}
-</button>
-
-💬 📤
-      </div>
-
-      <div class="post-caption">
-        <b>${data.email}</b><br>
-        ${data.caption || ""}
-      </div>
-
-    </div>
     `;
 
   });
 
-});window.likePost = async (id) => {
+});
+
+// Like
+window.likePost = async (id) => {
 
   try {
-
     await updateDoc(
       doc(db, "posts", id),
       {
         likes: increment(1)
       }
     );
-
   } catch (e) {
     console.log(e);
   }
 
-};window.openStory = (image) => {
-
-  localStorage.setItem("storyImage", image);
-
-  window.location.href = "viewer.html";
-
 };
+
+// Story Open
+window.openStory = (image) => {
+  localStorage.setItem("storyImage", image);
+  window.location.href = "viewer.html";
+};
+
+// Logout
+if (logoutBtn) {
+  logoutBtn.onclick = async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  };
+}
