@@ -24,6 +24,10 @@ const chatUser = document.getElementById("chatUser");
 const chatWith = localStorage.getItem("chatUser");
 
 chatUser.innerHTML = "💬 " + chatWith;
+if (!chatWith) {
+  alert("No chat selected");
+  window.location.href = "home.html";
+}
 
 onAuthStateChanged(auth, (user) => {
 
