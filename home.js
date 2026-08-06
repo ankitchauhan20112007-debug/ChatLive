@@ -80,7 +80,8 @@ onSnapshot(collection(db, "stories"), (snapshot) => {
       <div class="story">
         <img
           src="${data.image}"
-          onclick="openStory('${data.image}')"
+        class="story-img"
+data-image="${data.image}"
           style="
             width:65px;
             height:65px;
@@ -94,6 +95,12 @@ onSnapshot(collection(db, "stories"), (snapshot) => {
     `;
 
   });
+document.querySelectorAll(".story-img").forEach((img) => {
+  img.addEventListener("click", () => {
+    localStorage.setItem("storyImage", img.dataset.image);
+    window.location.href = "viewer.html";
+  });
+});
 
 });// Feed
 onSnapshot(collection(db, "posts"), (snapshot) => {
