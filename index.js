@@ -1,6 +1,5 @@
-alert("index.js loaded");
 
-// import { auth, db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 alert("index.js loaded");
 import {
   createUserWithEmailAndPassword,
