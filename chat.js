@@ -36,12 +36,12 @@ onAuthStateChanged(auth, (user) => {
 
   if (message.value.trim() == "") return;
 
-  await addDoc(collection(db, "messages"), {
-    from: user.email,
-    to: chatWith,
-    text: message.value,
-    time: serverTimestamp()
-  });
+await addDoc(collection(db, "messages"), {
+  from: auth.currentUser.email,
+  to: chatWith,
+  text: message.value,
+  time: serverTimestamp()
+});
 
   message.value = "";
 
@@ -73,13 +73,13 @@ sendImage.onclick = async () => {
     return;
   }
 
-  await addDoc(collection(db, "messages"), {
-    from: user.email,
-    to: chatWith,
-    image: img.secure_url,
-    text: "",
-    time: serverTimestamp()
-  });
+await addDoc(collection(db, "messages"), {
+  from: auth.currentUser.email,
+  to: chatWith,
+  image: img.secure_url,
+  text: "",
+  time: serverTimestamp()
+});
 
   chatImage.value = "";
 };const q = query(
