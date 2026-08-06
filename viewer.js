@@ -25,14 +25,17 @@ onSnapshot(q, (snapshot) => {
     stories.push(doc.data());
   });
 
-  if (stories.length > 0) {
-const savedStory = localStorage.getItem("storyImage");
+ if (stories.length > 0) {
 
-if (savedStory) {
-  storyImg.src = savedStory;
-}
+  const savedStory = localStorage.getItem("storyImage");
+
+  if (savedStory) {
+    storyImg.src = savedStory;
+  } else {
     storyImg.src = stories[0].image;
   }
+
+}
 
 });
 
