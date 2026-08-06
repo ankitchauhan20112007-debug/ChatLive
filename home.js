@@ -17,52 +17,81 @@ import {
 const usersDiv = document.getElementById("users");
 const storiesDiv = document.getElementById("stories");
 const feed = document.getElementById("feed");
-const logoutBtn = document.getElementById("logoutBtn");onAuthStateChanged(auth, async (user) => {
+const logoutBtn = document.getElementById("logoutBtn");
+
+let currentUser = null;onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     window.location.href = "index.html";
     return;
   }
 
+  currentUser = user;
+
   await setDoc(doc(db, "users", user.uid), {
     email: user.email,
     online: true
   }, { merge: true });
 
-  // Stories
-  onSnapshot(collection(db, "stories"), (snapshot) => {
+});// Online Users
+onSnapshot(collection(db, "users"), (snapshot) => {
 
-    storiesDiv.innerHTML = `
-      <div class="story">
-        <a href="stories.html" style="text-decoration:none;color:black">
-          <div class="story-ring">➕</div>
-          <p>Your Story</p>
-        </a>
-      </div>
-    `;
+  usersDiv.innerHTML = "";
 
-    snapshot.forEach((story) => {
+  snapshot.forEach((userDoc) => {
 
-      const data = story.data();
+    const data = userDoc.data();
 
-      storiesDiv.innerHTML += `
-      <div class="story">
-        <img
-        src="${data.image}"
-        onclick="openStory('${data.image}')"
-        style="
-        width:65px;
-        height:65px;
-        border-radius:50%;
-        object-fit:cover;
-        border:3px solid #ff0066;
-        cursor:pointer;
-        ">
-        <p>${data.email.split("@")[0]}</p>
+    if (currentUser && data.email !== currentUser.email) {
+
+      usersDiv.innerHTML += `
+      <div class="card">
+        <h3>${data.name || data.email}</h3>
+
+        <p class="${data.online ? "online" : "offline"}">
+          ${data.online ? "🟢 Online" : "⚪ Offline"}
+        </p>
       </div>
       `;
 
-    });
+    }
+
+  });
+
+});
+
+// Stories
+onSnapshot(collection(db, "stories"), (snapshot) => {
+
+  storiesDiv.innerHTML = `
+    <div class="story">
+      <a href="stories.html" style="text-decoration:none;color:black">
+        <div class="story-ring">➕</div>
+        <p>Your Story</p>
+      </a>
+    </div>
+  `;
+
+  snapshot.forEach((story) => {
+
+    const data = story.data();
+
+    storiesDiv.innerHTML += `
+      <div class="story">
+        <img
+          src="${data.image}"
+          onclick="openStory('${data.image}')"
+          style="
+            width:65px;
+            height:65px;
+            border-radius:50%;
+            object-fit:cover;
+            border:3px solid #ff0066;
+            cursor:pointer;
+          ">
+        <p>${data.email.split("@")[0]}</p>
+      </div>
+    `;
 
   });
 
@@ -83,13 +112,14 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
         </div>
 
         <img
-        src="${data.image}"
-        class="post-image">
+          src="${data.image}"
+          class="post-image">
 
         <div class="post-actions">
           <button onclick="likePost('${post.id}')">
             ❤️ ${data.likes || 0}
           </button>
+
           💬 📤
         </div>
 
@@ -103,34 +133,67 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
 
   });
 
-});
-
-// Like
-window.likePost = async (id) => {
+});// Like
+window.likePost = async (postId) => {
 
   try {
+
     await updateDoc(
-      doc(db, "posts", id),
+      doc(db, "posts", postId),
       {
         likes: increment(1)
       }
     );
-  } catch (e) {
-    console.log(e);
+
+  } catch (err) {
+    console.log(err);
   }
 
-};
-
-// Story Open
+};// Story Open
 window.openStory = (image) => {
+
   localStorage.setItem("storyImage", image);
+
   window.location.href = "viewer.html";
+
 };
 
 // Logout
 if (logoutBtn) {
+
   logoutBtn.onclick = async () => {
+
     await signOut(auth);
+
     window.location.href = "index.html";
+
   };
-}
+
+}// Online / Offline Status
+window.addEventListener("beforeunload", async () => {
+
+  if (!currentUser) return;
+
+  await setDoc(
+    doc(db, "users", currentUser.uid),
+    {
+      online: false
+    },
+    { merge: true }
+  );
+
+});
+
+document.addEventListener("visibilitychange", async () => {
+
+  if (!currentUser) return;
+
+  await setDoc(
+    doc(db, "users", currentUser.uid),
+    {
+      online: !document.hidden
+    },
+    { merge: true }
+  );
+
+});
