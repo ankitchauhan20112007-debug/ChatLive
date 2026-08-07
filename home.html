@@ -1,54 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatLive</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ChatLive</title>
-
-<link rel="stylesheet" href="style.css">
-
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="topbar">
+  <div class="topbar">
+    <h2>📸 ChatLive</h2>
 
-<h2>📸 ChatLive</h2>
+    <div class="top-icons">
+      <span>❤️</span>
+      <span>💬</span>
+    </div>
+  </div>
 
-<div class="top-icons">
-<span>❤️</span>
-<span>💬</span>
-</div>
+  <!-- Stories -->
+  <div class="stories" id="stories"></div>
 
-</div>
-<div class="stories" id="stories"></div>
+  <!-- Feed -->
+  <div id="feed"></div>
 
-<div class="story">
-<div class="story-ring">➕</div>
-<p>Your Story</p>
-</div>
+  <!-- Bottom Navigation -->
+  <div class="navbar">
 
+    <a href="home.html">🏠</a>
 
-<div id="feed"></div>
+    <a href="#">🔍</a>
 
-<div class="navbar">
+    <a href="post.html">➕</a>
 
-<a href="home.html">🏠</a>
+    <a href="chat.html">💬</a>
 
-<a href="#">🔍</a>
+    <a href="profile.html">👤</a>
 
-<a href="post.html">➕</a>
+  </div>
 
-<a href="chat.html">💬</a>
-
-<a href="profile.html">👤</a>
-
-</div>
-<script type="module" src="home.js"></script>
-
-
+  <script type="module" src="home.js"></script>
 
 </body>
 </html>
