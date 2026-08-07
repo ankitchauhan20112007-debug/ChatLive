@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ChatLive Posts</title>
+<title>ChatLive - Create</title>
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +13,7 @@
 
 <div class="container">
 
-<h2>📸 ChatLive Posts</h2>
+<h2>📸 Create Post / Story</h2>
 
 <input
 type="file"
@@ -21,11 +21,21 @@ id="postImage"
 accept="image/*">
 
 <input
+type="text"
 id="caption"
-placeholder="Write something...">
+placeholder="Write Caption...">
 
-<button id="postBtn">Post</button>
-<button id="storyBtn">Add Story</button>
+<button id="postBtn">
+📸 Upload Post
+</button>
+
+<button id="storyBtn">
+⭕ Upload Story
+</button>
+
+<hr>
+
+<h3>Recent Posts</h3>
 
 <div id="posts"></div>
 
