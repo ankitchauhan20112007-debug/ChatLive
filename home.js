@@ -19,7 +19,9 @@ const storiesDiv = document.getElementById("stories");
 const feed = document.getElementById("feed");
 const logoutBtn = document.getElementById("logoutBtn");
 
-let currentUser = null;onAuthStateChanged(auth, async (user) => {
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     window.location.href = "index.html";
@@ -28,13 +30,19 @@ let currentUser = null;onAuthStateChanged(auth, async (user) => {
 
   currentUser = user;
 
-  await setDoc(doc(db, "users", user.uid), {
-    email: user.email,
-    online: true
-  }, { merge: true });
+  await setDoc(
+    doc(db, "users", user.uid),
+    {
+      email: user.email,
+      online: true
+    },
+    { merge: true }
+  );
 
 });// Online Users
 onSnapshot(collection(db, "users"), (snapshot) => {
+
+  if (!usersDiv || !currentUser) return;
 
   usersDiv.innerHTML = "";
 
@@ -42,7 +50,7 @@ onSnapshot(collection(db, "users"), (snapshot) => {
 
     const data = userDoc.data();
 
-    if (currentUser && data.email !== currentUser.email) {
+    if (data.email !== currentUser.email) {
 
       usersDiv.innerHTML += `
       <div class="card">
@@ -58,10 +66,10 @@ onSnapshot(collection(db, "users"), (snapshot) => {
 
   });
 
-});
-
-// Stories
+});// Stories
 onSnapshot(collection(db, "stories"), (snapshot) => {
+
+  if (!storiesDiv) return;
 
   storiesDiv.innerHTML = `
     <div class="story">
@@ -72,16 +80,16 @@ onSnapshot(collection(db, "stories"), (snapshot) => {
     </div>
   `;
 
-  snapshot.forEach((story) => {
+  snapshot.forEach((storyDoc) => {
 
-    const data = story.data();
+    const data = storyDoc.data();
 
     storiesDiv.innerHTML += `
       <div class="story">
         <img
+          class="story-img"
+          data-image="${data.image}"
           src="${data.image}"
-        class="story-img"
-data-image="${data.image}"
           style="
             width:65px;
             height:65px;
@@ -90,26 +98,29 @@ data-image="${data.image}"
             border:3px solid #ff0066;
             cursor:pointer;
           ">
-        <p>${data.email.split("@")[0]}</p>
+        <p>${(data.email || "").split("@")[0]}</p>
       </div>
     `;
 
   });
-document.querySelectorAll(".story-img").forEach((img) => {
-  img.addEventListener("click", () => {
-    localStorage.setItem("storyImage", img.dataset.image);
-    window.location.href = "viewer.html";
+
+  document.querySelectorAll(".story-img").forEach((img) => {
+    img.onclick = () => {
+      localStorage.setItem("storyImage", img.dataset.image);
+      window.location.href = "viewer.html";
+    };
   });
-});
 
 });// Feed
 onSnapshot(collection(db, "posts"), (snapshot) => {
 
+  if (!feed) return;
+
   feed.innerHTML = "";
 
-  snapshot.forEach((post) => {
+  snapshot.forEach((postDoc) => {
 
-    const data = post.data();
+    const data = postDoc.data();
 
     feed.innerHTML += `
       <div class="post-card">
@@ -123,7 +134,7 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
           class="post-image">
 
         <div class="post-actions">
-          <button onclick="likePost('${post.id}')">
+          <button onclick="likePost('${postDoc.id}')">
             ❤️ ${data.likes || 0}
           </button>
 
@@ -140,7 +151,9 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
 
   });
 
-});// Like
+});
+
+// Like
 window.likePost = async (postId) => {
 
   try {
@@ -156,16 +169,7 @@ window.likePost = async (postId) => {
     console.log(err);
   }
 
-};// Story Open
-window.openStory = (image) => {
-
-  localStorage.setItem("storyImage", image);
-
-  window.location.href = "viewer.html";
-
-};
-
-// Logout
+};// Logout
 if (logoutBtn) {
 
   logoutBtn.onclick = async () => {
@@ -176,7 +180,9 @@ if (logoutBtn) {
 
   };
 
-}// Online / Offline Status
+}
+
+// Online / Offline Status
 window.addEventListener("beforeunload", async () => {
 
   if (!currentUser) return;
