@@ -1,4 +1,4 @@
-const cacheName = "chatlive-v1";
+const cacheName = "chatlive-v2";
 const filesToCache = [
   "./",
   "./index.html",
