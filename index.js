@@ -74,4 +74,4 @@ login.addEventListener("click", async () => {
     console.log(error);
   }
 
-});
+});alert("Login JS Loaded");
