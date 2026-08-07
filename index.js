@@ -18,20 +18,16 @@ const signup = document.getElementById("signup");
 const login = document.getElementById("login");
 const msg = document.getElementById("msg");
 
-// Auto Login
 onAuthStateChanged(auth, (user) => {
   if (user) {
     window.location.href = "home.html";
   }
 });
 
-// Signup
 signup.addEventListener("click", async () => {
-
-  msg.innerHTML = "";
+  msg.textContent = "";
 
   try {
-
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email.value.trim(),
@@ -48,19 +44,15 @@ signup.addEventListener("click", async () => {
     window.location.href = "home.html";
 
   } catch (error) {
-    msg.innerHTML = error.message;
-    console.log(error);
+    msg.textContent = error.message;
+    console.error(error);
   }
-
 });
 
-// Login
 login.addEventListener("click", async () => {
-
-  msg.innerHTML = "";
+  msg.textContent = "";
 
   try {
-
     await signInWithEmailAndPassword(
       auth,
       email.value.trim(),
@@ -70,8 +62,7 @@ login.addEventListener("click", async () => {
     window.location.href = "home.html";
 
   } catch (error) {
-    msg.innerHTML = error.message;
-    console.log(error);
+    msg.textContent = error.message;
+    console.error(error);
   }
-
-});alert("Login JS Loaded");
+});
