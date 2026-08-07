@@ -1,6 +1,5 @@
 import { auth, db } from "./firebase.js";
 
-alert("index.js loaded");
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -19,59 +18,60 @@ const signup = document.getElementById("signup");
 const login = document.getElementById("login");
 const msg = document.getElementById("msg");
 
+// Auto Login
 onAuthStateChanged(auth, (user) => {
   if (user) {
     window.location.href = "home.html";
   }
-});signup.onclick = async () => {
+});
+
+// Signup
+signup.addEventListener("click", async () => {
+
+  msg.innerHTML = "";
 
   try {
 
-    const userCredential =
-      await createUserWithEmailAndPassword(
-        auth,
-        email.value,
-        password.value
-      );
-
-    await setDoc(
-      doc(db, "users", userCredential.user.uid),
-      {
-        uid: userCredential.user.uid,
-        name: name.value,
-        email: email.value,
-        online: true
-      }
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email.value.trim(),
+      password.value
     );
+
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      uid: userCredential.user.uid,
+      name: name.value.trim(),
+      email: email.value.trim(),
+      online: true
+    });
 
     window.location.href = "home.html";
 
   } catch (error) {
-
     msg.innerHTML = error.message;
-
+    console.log(error);
   }
 
-};
+});
 
-login.onclick = async () => {
+// Login
+login.addEventListener("click", async () => {
+
+  msg.innerHTML = "";
 
   try {
 
     await signInWithEmailAndPassword(
       auth,
-      email.value,
+      email.value.trim(),
       password.value
     );
 
     window.location.href = "home.html";
 
   } catch (error) {
-
     msg.innerHTML = error.message;
-
+    console.log(error);
   }
 
-};
-</body>
-</html>
+});
