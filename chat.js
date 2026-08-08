@@ -9,10 +9,13 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+
 const friendsDiv = document.getElementById("friends");
 
 let currentUser = null;
 
+
+// Login check
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
@@ -21,11 +24,13 @@ onAuthStateChanged(auth, (user) => {
   }
 
   currentUser = user;
+
   loadFriends();
 
 });
 
 
+// Friends load
 function loadFriends() {
 
   onSnapshot(
@@ -37,11 +42,13 @@ function loadFriends() {
 
       let foundFriend = false;
 
+
       snapshot.forEach((userDoc) => {
 
         const data = userDoc.data();
 
-        // खुद को list में नहीं दिखाना
+
+        // खुद को नहीं दिखाना
         if (
           currentUser &&
           userDoc.id === currentUser.uid
@@ -49,10 +56,13 @@ function loadFriends() {
           return;
         }
 
+
         foundFriend = true;
+
 
         const friend =
           document.createElement("div");
+
 
         friend.style.cssText = `
           background:white;
@@ -67,9 +77,17 @@ function loadFriends() {
         `;
 
 
+        // Profile photo
         const photo =
           data.photo ||
           "https://via.placeholder.com/60";
+
+
+        // Online dot
+        const dotColor =
+          data.online === true
+          ? "green"
+          : "lightgray";
 
 
         friend.innerHTML = `
@@ -85,73 +103,38 @@ function loadFriends() {
             "
           >
 
+
           <div style="flex:1;">
 
             <div style="
-              font-size:17px;
+              font-size:18px;
               font-weight:bold;
             ">
               ${data.name || "User"}
             </div>
 
-            friend.innerHTML = `
-
-  <img
-    src="${photo}"
-    style="
-      width:60px;
-      height:60px;
-      border-radius:50%;
-      object-fit:cover;
-      border:2px solid #075E54;
-    "
-  >
-
-  <div style="flex:1;">
-
-    <div style="
-      font-size:17px;
-      font-weight:bold;
-    ">
-      ${data.name || "User"}
-    </div>
-
-    <div style="
-      font-size:13px;
-      margin-top:3px;
-    ">
-      ${
-        data.online
-        ? "🟢 Online"
-        : "⚪ Offline"
-      }
-    </div>
-
-  </div>
-
-  <div style="font-size:20px;">
-    💬
-  </div>
-
-`;
 
             <div style="
-              font-size:13px;
-              margin-top:3px;
+              margin-top:5px;
             ">
-           <span style="
-  display:inline-block;
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:${data.online ? "green" : "gray"};
-"></span>
+
+              <span
+                style="
+                  display:inline-block;
+                  width:10px;
+                  height:10px;
+                  border-radius:50%;
+                  background:${dotColor};
+                "
+              ></span>
+
             </div>
 
           </div>
 
+
           <div style="
-            font-size:20px;
+            font-size:22px;
           ">
             💬
           </div>
@@ -159,6 +142,7 @@ function loadFriends() {
         `;
 
 
+        // Friend click
         friend.addEventListener(
           "click",
           () => {
@@ -168,17 +152,13 @@ function loadFriends() {
               userDoc.id
             );
 
+
             localStorage.setItem(
               "chatFriendName",
               data.name ||
-              data.email ||
               "User"
             );
 
-            localStorage.setItem(
-              "chatFriendEmail",
-              data.email || ""
-            );
 
             window.location.href =
               "conversation.html";
@@ -192,6 +172,7 @@ function loadFriends() {
       });
 
 
+      // No friends
       if (!foundFriend) {
 
         friendsDiv.innerHTML = `
@@ -199,7 +180,7 @@ function loadFriends() {
             text-align:center;
             color:#777;
           ">
-            अभी कोई दूसरा registered user नहीं है।
+            अभी कोई friend नहीं है।
           </p>
         `;
 
@@ -207,28 +188,5 @@ function loadFriends() {
 
     },
 
+
     (error) => {
-
-      console.error(
-        "Friends error:",
-        error
-      );
-
-      friendsDiv.innerHTML = `
-        <div style="
-          background:#ffe5e5;
-          color:#b00000;
-          padding:15px;
-          border-radius:10px;
-        ">
-          ❌ Friends load नहीं हुए।
-          <br><br>
-          ${error.message}
-        </div>
-      `;
-
-    }
-
-  );
-
-}
