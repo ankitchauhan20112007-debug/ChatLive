@@ -108,7 +108,7 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
 
   });
 
-});// Like Post
+});// ===== LIKE =====
 window.likePost = async (postId) => {
 
   try {
@@ -120,55 +120,69 @@ window.likePost = async (postId) => {
       }
     );
 
-  } catch (err) {
+  } catch (error) {
 
-    console.log(err);
+    console.error("Like error:", error);
     alert("Like failed");
 
   }
 
 };
 
-// Logout Function (अगर logout button हो)
+
+// ===== LOGOUT =====
 const logoutBtn = document.getElementById("logoutBtn");
 
 if (logoutBtn) {
 
-  logoutBtn.onclick = async () => {
+  logoutBtn.addEventListener("click", async () => {
 
-    await signOut(auth);
+    try {
 
-    window.location.href = "index.html";
+      if (currentUser) {
+        await setDoc(
+          doc(db, "users", currentUser.uid),
+          {
+            online: false
+          },
+          { merge: true }
+        );
+      }
 
-  };
+      await signOut(auth);
+
+      window.location.href = "index.html";
+
+    } catch (error) {
+
+      console.error("Logout error:", error);
+
+    }
+
+  });
 
 }
 
-// Online / Offline Status
-window.addEventListener("beforeunload", async () => {
 
-  if (!currentUser) return;
-
-  await setDoc(
-    doc(db, "users", currentUser.uid),
-    {
-      online: false
-    },
-    { merge: true }
-  );
-
-});
-
+// ===== ONLINE / OFFLINE =====
 document.addEventListener("visibilitychange", async () => {
 
   if (!currentUser) return;
 
-  await setDoc(
-    doc(db, "users", currentUser.uid),
-    {
-      online: !document.hidden
-    },
-    { merge: true }
-  );
+  try {
+
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      {
+        online: !document.hidden
+      },
+      { merge: true }
+    );
+
+  } catch (error) {
+
+    console.error("Online status error:", error);
+
+  }
 
 });
