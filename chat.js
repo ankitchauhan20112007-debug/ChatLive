@@ -12,25 +12,32 @@ import {
 
 const friendsDiv = document.getElementById("friends");
 
-let currentUser = null;
+
+if (!friendsDiv) {
+  console.error("friends element नहीं मिला");
+}
 
 
 // Login check
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    window.location.href = "index.html";
+    friendsDiv.innerHTML = `
+      <p style="text-align:center;">
+        Please login first.
+      </p>
+    `;
+
     return;
   }
 
-  currentUser = user;
 
   loadFriends();
 
 });
 
 
-// Friends load
+// Load friends
 function loadFriends() {
 
   onSnapshot(
@@ -40,7 +47,7 @@ function loadFriends() {
 
       friendsDiv.innerHTML = "";
 
-      let foundFriend = false;
+      let count = 0;
 
 
       snapshot.forEach((userDoc) => {
@@ -48,49 +55,47 @@ function loadFriends() {
         const data = userDoc.data();
 
 
-        // खुद को नहीं दिखाना
+        // अपना account hide करो
         if (
-          currentUser &&
-          userDoc.id === currentUser.uid
+          auth.currentUser &&
+          userDoc.id === auth.currentUser.uid
         ) {
           return;
         }
 
 
-        foundFriend = true;
+        count++;
 
 
-        const friend =
+        const card =
           document.createElement("div");
 
 
-        friend.style.cssText = `
+        card.style.cssText = `
           background:white;
-          padding:12px;
-          margin:10px 0;
-          border-radius:15px;
-          cursor:pointer;
-          box-shadow:0 2px 7px rgba(0,0,0,.15);
+          margin:12px 0;
+          padding:15px;
+          border-radius:18px;
           display:flex;
           align-items:center;
           gap:12px;
+          box-shadow:0 2px 8px rgba(0,0,0,0.12);
+          cursor:pointer;
         `;
 
 
-        // Profile photo
         const photo =
           data.photo ||
           "https://via.placeholder.com/60";
 
 
-        // Online dot
-        const dotColor =
+        const dot =
           data.online === true
           ? "green"
-          : "lightgray";
+          : "#d3d3d3";
 
 
-        friend.innerHTML = `
+        card.innerHTML = `
 
           <img
             src="${photo}"
@@ -99,7 +104,6 @@ function loadFriends() {
               height:60px;
               border-radius:50%;
               object-fit:cover;
-              border:2px solid #075E54;
             "
           >
 
@@ -114,9 +118,7 @@ function loadFriends() {
             </div>
 
 
-            <div style="
-              margin-top:5px;
-            ">
+            <div style="margin-top:6px;">
 
               <span
                 style="
@@ -124,7 +126,7 @@ function loadFriends() {
                   width:10px;
                   height:10px;
                   border-radius:50%;
-                  background:${dotColor};
+                  background:${dot};
                 "
               ></span>
 
@@ -134,7 +136,7 @@ function loadFriends() {
 
 
           <div style="
-            font-size:22px;
+            font-size:24px;
           ">
             💬
           </div>
@@ -142,45 +144,42 @@ function loadFriends() {
         `;
 
 
-        // Friend click
-        friend.addEventListener(
-          "click",
-          () => {
+        // Friend पर click
+        card.onclick = () => {
 
-            localStorage.setItem(
-              "chatFriendUid",
-              userDoc.id
-            );
+          localStorage.setItem(
+            "chatFriendUid",
+            userDoc.id
+          );
 
 
-            localStorage.setItem(
-              "chatFriendName",
-              data.name ||
-              "User"
-            );
+          localStorage.setItem(
+            "chatFriendName",
+            data.name || "User"
+          );
 
 
-            window.location.href =
-              "conversation.html";
+          window.location.href =
+            "conversation.html";
 
-          }
-        );
+        };
 
 
-        friendsDiv.appendChild(friend);
+        friendsDiv.appendChild(card);
 
       });
 
 
-      // No friends
-      if (!foundFriend) {
+      // कोई friend नहीं
+      if (count === 0) {
 
         friendsDiv.innerHTML = `
           <p style="
             text-align:center;
             color:#777;
+            margin-top:30px;
           ">
-            अभी कोई friend नहीं है।
+            कोई friend नहीं मिला।
           </p>
         `;
 
@@ -190,3 +189,28 @@ function loadFriends() {
 
 
     (error) => {
+
+      console.error(
+        "Firestore error:",
+        error
+      );
+
+
+      friendsDiv.innerHTML = `
+        <div style="
+          background:#ffe5e5;
+          padding:15px;
+          border-radius:12px;
+          color:#b00000;
+        ">
+          ❌ Friends load नहीं हुए।
+          <br><br>
+          ${error.message}
+        </div>
+      `;
+
+    }
+
+  );
+
+}
