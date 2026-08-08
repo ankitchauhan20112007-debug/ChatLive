@@ -62,6 +62,7 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
 
   loadMessages();
+loadFriendStatus();
 
 });
 
@@ -265,5 +266,42 @@ async function sendMessage() {
     );
 
   }
+
+}function loadFriendStatus() {
+
+  onSnapshot(
+    doc(db, "users", friendUid),
+    (snapshot) => {
+
+      if (!snapshot.exists()) {
+        friendStatus.textContent =
+          "⚪ User not found";
+        return;
+      }
+
+      const data = snapshot.data();
+
+      friendName.textContent =
+        "💬 " + (data.name || data.email || "Friend");
+
+      if (data.online === true) {
+        friendStatus.textContent = "🟢 Online";
+      } else {
+        friendStatus.textContent = "⚪ Offline";
+      }
+
+    },
+    (error) => {
+
+      console.error(
+        "Friend status error:",
+        error
+      );
+
+      friendStatus.textContent =
+        "⚪ Offline";
+
+    }
+  );
 
 }
