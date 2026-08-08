@@ -1,6 +1,10 @@
 import { auth, db } from "./firebase.js";
 
 import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+import {
   collection,
   addDoc,
   query,
@@ -9,142 +13,109 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
-const messages = document.getElementById("messages");
-const message = document.getElementById("message");
-const emojiBtn = document.getElementById("emojiBtn");
+const messagesDiv = document.getElementById("messages");
+const messageInput = document.getElementById("message");
 const sendBtn = document.getElementById("sendBtn");
-const chatImage = document.getElementById("chatImage");
-const sendImage = document.getElementById("sendImage");
 const chatUser = document.getElementById("chatUser");
+const emojiBtn = document.getElementById("emojiBtn");
 
-const chatWith = localStorage.getItem("chatUser");
-
-chatUser.innerHTML = "💬 " + chatWith;
-if (!chatWith) {
-  alert("No chat selected");
-  window.location.href = "home.html";
-}
+let currentUser = null;
 
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    location.href = "index.html";
+    window.location.href = "index.html";
     return;
   }
 
-});sendBtn.onclick = async () => {
+  currentUser = user;
 
-  if (message.value.trim() == "") return;
+  chatUser.textContent = user.email;
+});// ===== SEND TEXT MESSAGE =====
 
-await addDoc(collection(db, "messages"), {
-  from: auth.currentUser.email,
-  to: chatWith,
-  text: message.value,
-  time: serverTimestamp()
+sendBtn.addEventListener("click", async () => {
+
+  const text = messageInput.value.trim();
+
+  if (!text) return;
+  if (!currentUser) return;
+
+  try {
+
+    await addDoc(collection(db, "messages"), {
+      text: text,
+      sender: currentUser.email,
+      time: serverTimestamp()
+    });
+
+    messageInput.value = "";
+
+  } catch (error) {
+
+    console.error("Message error:", error);
+    alert("Message send नहीं हुआ");
+
+  }
+
 });
 
-  message.value = "";
 
-};
+// ===== ENTER KEY =====
 
-sendImage.onclick = async () => {
+messageInput.addEventListener("keydown", (event) => {
 
-  if (!chatImage.files[0]) {
-    alert("Please select image");
-    return;
+  if (event.key === "Enter") {
+    sendBtn.click();
   }
 
-  const formData = new FormData();
-  formData.append("file", chatImage.files[0]);
-  formData.append("upload_preset", "swlqxqgn");
-
-  const upload = await fetch(
-    "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
-    {
-      method: "POST",
-      body: formData
-    }
-  );
-
-  const img = await upload.json();
-
-  if (!img.secure_url) {
-    alert("Image upload failed");
-    return;
-  }
-
-await addDoc(collection(db, "messages"), {
-  from: auth.currentUser.email,
-  to: chatWith,
-  image: img.secure_url,
-  text: "",
-  time: serverTimestamp()
 });
 
-  chatImage.value = "";
-};const q = query(
+
+// ===== EMOJI =====
+
+emojiBtn.addEventListener("click", () => {
+
+  messageInput.value += " 😊";
+  messageInput.focus();
+
+});// ===== SHOW MESSAGES =====
+
+const messagesQuery = query(
   collection(db, "messages"),
   orderBy("time", "asc")
 );
 
-onSnapshot(q, (snapshot) => {
+onSnapshot(messagesQuery, (snapshot) => {
 
-  messages.innerHTML = "";
+  messagesDiv.innerHTML = "";
 
-  snapshot.forEach((msg) => {
+  snapshot.forEach((messageDoc) => {
 
-    const data = msg.data();
+    const data = messageDoc.data();
 
-    if (
-      (data.from === auth.currentUser.email && data.to === chatWith) ||
-      (data.from === chatWith && data.to === auth.currentUser.email)
-    ) {
+    const isMine =
+      currentUser &&
+      data.sender === currentUser.email;
 
-      const mine = data.from === auth.currentUser.email;
+    const div = document.createElement("div");
 
-      messages.innerHTML += `
-      <div style="
-        display:flex;
-        justify-content:${mine ? "flex-end" : "flex-start"};
-        margin:8px 0;
-      ">
-        <div style="
-          background:${mine ? "#0095f6" : "#e5e5ea"};
-          color:${mine ? "#fff" : "#000"};
-          padding:10px;
-          border-radius:15px;
-          max-width:75%;
-        ">
+    div.style.marginBottom = "8px";
+    div.style.padding = "8px";
+    div.style.borderRadius = "10px";
+    div.style.background = isMine ? "#dcf8c6" : "#ffffff";
+    div.style.textAlign = isMine ? "right" : "left";
 
-        ${
-          data.image
-            ? `<img src="${data.image}" style="max-width:220px;border-radius:10px;display:block;">`
-            : ""
-        }
+    div.innerHTML = `
+      <small>
+        <b>${data.sender || ""}</b>
+      </small>
+      <br>
+      ${data.text || ""}
+    `;
 
-        ${data.text || ""}
-
-        </div>
-      </div>
-      `;
-    }
-
+    messagesDiv.appendChild(div);
   });
 
-  messages.scrollTop = messages.scrollHeight;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
 });
-
-emojiBtn.onclick = () => {
-
-  const emoji = prompt("Enter Emoji 😊");
-
-  if (emoji) {
-    message.value += emoji;
-  }
-
-};
