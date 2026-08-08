@@ -1,4 +1,3 @@
-alert("chat.js loaded");
 import { auth, db } from "./firebase.js";
 
 import {
@@ -7,18 +6,10 @@ import {
 
 import {
   collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-const messagesDiv = document.getElementById("messages");
-const messageInput = document.getElementById("message");
-const sendBtn = document.getElementById("sendBtn");
-const chatUser = document.getElementById("chatUser");
-const emojiBtn = document.getElementById("emojiBtn");
+const friendsDiv = document.getElementById("friends");
 
 let currentUser = null;
 
@@ -30,93 +21,89 @@ onAuthStateChanged(auth, (user) => {
   }
 
   currentUser = user;
+  loadFriends();
 
-  chatUser.textContent = user.email;
-});// ===== SEND TEXT MESSAGE =====
+});
 
-sendBtn.addEventListener("click", async () => {
 
-  const text = messageInput.value.trim();
+function loadFriends() {
 
-  if (!text) return;
-  if (!currentUser) return;
+  onSnapshot(collection(db, "users"), (snapshot) => {
 
-  try {
+    friendsDiv.innerHTML = "";
 
-    await addDoc(collection(db, "messages"), {
-      text: text,
-      sender: currentUser.email,
-      time: serverTimestamp()
+    let foundFriend = false;
+
+    snapshot.forEach((userDoc) => {
+
+      const data = userDoc.data();
+
+      // खुद को Friend List में नहीं दिखाना
+      if (
+        currentUser &&
+        userDoc.id === currentUser.uid
+      ) {
+        return;
+      }
+
+      foundFriend = true;
+
+      const friend = document.createElement("div");
+
+      friend.style.cssText = `
+        background:white;
+        padding:15px;
+        margin:10px 0;
+        border-radius:12px;
+        cursor:pointer;
+        box-shadow:0 2px 6px rgba(0,0,0,.15);
+      `;
+
+      friend.innerHTML = `
+        <b>👤 ${data.name || "User"}</b>
+        <br>
+        <small>${data.email || ""}</small>
+        <br>
+        <span>
+          ${data.online ? "🟢 Online" : "⚪ Offline"}
+        </span>
+      `;
+
+      friend.addEventListener("click", () => {
+
+        localStorage.setItem(
+          "chatFriendUid",
+          userDoc.id
+        );
+
+        localStorage.setItem(
+          "chatFriendName",
+          data.name || data.email || "User"
+        );
+
+        localStorage.setItem(
+          "chatFriendEmail",
+          data.email || ""
+        );
+
+        window.location.href = "conversation.html";
+
+      });
+
+      friendsDiv.appendChild(friend);
+
     });
 
-    messageInput.value = "";
+    if (!foundFriend) {
 
-  } catch (error) {
+      friendsDiv.innerHTML = `
+        <p style="text-align:center;">
+          अभी कोई दूसरा registered user नहीं है।
+        </p>
+      `;
 
-    console.error("Message error:", error);
-    alert("Message send नहीं हुआ");
+    }
 
-  }
-
-});
-
-
-// ===== ENTER KEY =====
-
-messageInput.addEventListener("keydown", (event) => {
-
-  if (event.key === "Enter") {
-    sendBtn.click();
-  }
-
-});
-
-
-// ===== EMOJI =====
-
-emojiBtn.addEventListener("click", () => {
-
-  messageInput.value += " 😊";
-  messageInput.focus();
-
-});// ===== SHOW MESSAGES =====
-
-const messagesQuery = query(
-  collection(db, "messages"),
-  orderBy("time", "asc")
-);
-
-onSnapshot(messagesQuery, (snapshot) => {
-
-  messagesDiv.innerHTML = "";
-
-  snapshot.forEach((messageDoc) => {
-
-    const data = messageDoc.data();
-
-    const isMine =
-      currentUser &&
-      data.sender === currentUser.email;
-
-    const div = document.createElement("div");
-
-    div.style.marginBottom = "8px";
-    div.style.padding = "8px";
-    div.style.borderRadius = "10px";
-    div.style.background = isMine ? "#dcf8c6" : "#ffffff";
-    div.style.textAlign = isMine ? "right" : "left";
-
-    div.innerHTML = `
-      <small>
-        <b>${data.sender || ""}</b>
-      </small>
-      <br>
-      ${data.text || ""}
-    `;
-
-    messagesDiv.appendChild(div);
   });
 
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-});
+}
