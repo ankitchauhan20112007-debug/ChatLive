@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatLive Conversation</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2 id="friendName">Loading...</h2>
+
+  <div
+    id="messages"
+    style="
+      height:400px;
+      overflow-y:auto;
+      background:#f5f5f5;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:10px;
+    ">
+  </div>
+
+  <div style="display:flex;gap:8px;">
+
+    <input
+      type="text"
+      id="message"
+      placeholder="Type a message..."
+      style="flex:1;"
+    >
+
+    <button id="sendBtn">
+      Send
+    </button>
+
+  </div>
+
+</div>
+
+<div class="navbar">
+  <a href="home.html">🏠</a>
+  <a href="post.html">📸</a>
+  <a href="chat.html">💬</a>
+  <a href="profile.html">👤</a>
+</div>
+
+<script type="module" src="conversation.js"></script>
+
+</body>
+</html>
