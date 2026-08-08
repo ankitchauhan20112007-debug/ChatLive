@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ChatLive Conversation</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,16 +13,14 @@
 
   <h2 id="friendName">Loading...</h2>
 
-  <div
-    id="messages"
-    style="
-      height:400px;
-      overflow-y:auto;
-      background:#f5f5f5;
-      padding:10px;
-      border-radius:10px;
-      margin-bottom:10px;
-    ">
+  <div id="messages"
+       style="
+       height:400px;
+       overflow-y:auto;
+       background:#f5f5f5;
+       padding:10px;
+       border-radius:10px;
+       margin-bottom:10px;">
   </div>
 
   <div style="display:flex;gap:8px;">
@@ -35,9 +32,7 @@
       style="flex:1;"
     >
 
-    <button id="sendBtn">
-      Send
-    </button>
+    <button id="sendBtn">Send</button>
 
   </div>
 
@@ -53,175 +48,4 @@
 <script type="module" src="conversation.js"></script>
 
 </body>
-</html>import { auth, db } from "./firebase.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-const friendName = document.getElementById("friendName");
-const messagesDiv = document.getElementById("messages");
-const messageInput = document.getElementById("message");
-const sendBtn = document.getElementById("sendBtn");
-
-const friendUid = localStorage.getItem("chatFriendUid");
-const savedFriendName = localStorage.getItem("chatFriendName");
-
-let currentUser = null;
-
-if (!friendUid) {
-  window.location.href = "chat.html";
-}
-
-friendName.textContent = "💬 " + (savedFriendName || "Friend");
-
-onAuthStateChanged(auth, (user) => {
-
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  currentUser = user;
-
-  loadMessages();
-});
-
-
-// दोनों users के लिए एक ही conversation ID
-function getChatId(uid1, uid2) {
-
-  return [uid1, uid2]
-    .sort()
-    .join("_");
-
-}
-
-
-// Messages load
-function loadMessages() {
-
-  const chatId = getChatId(
-    currentUser.uid,
-    friendUid
-  );
-
-  const messagesRef = collection(
-    db,
-    "chats",
-    chatId,
-    "messages"
-  );
-
-  const messagesQuery = query(
-    messagesRef,
-    orderBy("time", "asc")
-  );
-
-  onSnapshot(messagesQuery, (snapshot) => {
-
-    messagesDiv.innerHTML = "";
-
-    snapshot.forEach((messageDoc) => {
-
-      const data = messageDoc.data();
-
-      const mine =
-        data.sender === currentUser.uid;
-
-      const messageBox =
-        document.createElement("div");
-
-      messageBox.style.cssText = `
-        margin:8px 0;
-        padding:9px 12px;
-        border-radius:12px;
-        max-width:75%;
-        word-wrap:break-word;
-        background:${mine ? "#dcf8c6" : "#ffffff"};
-        margin-left:${mine ? "auto" : "0"};
-      `;
-
-      messageBox.textContent =
-        data.text || "";
-
-      messagesDiv.appendChild(messageBox);
-
-    });
-
-    messagesDiv.scrollTop =
-      messagesDiv.scrollHeight;
-
-  });
-
-}
-
-
-// Send message
-sendBtn.addEventListener("click", sendMessage);
-
-
-messageInput.addEventListener("keydown", (event) => {
-
-  if (event.key === "Enter") {
-    sendMessage();
-  }
-
-});
-
-
-async function sendMessage() {
-
-  const text =
-    messageInput.value.trim();
-
-  if (!text || !currentUser) {
-    return;
-  }
-
-  try {
-
-    const chatId = getChatId(
-      currentUser.uid,
-      friendUid
-    );
-
-    await addDoc(
-      collection(
-        db,
-        "chats",
-        chatId,
-        "messages"
-      ),
-      {
-        text: text,
-        sender: currentUser.uid,
-        senderEmail: currentUser.email,
-        receiver: friendUid,
-        time: serverTimestamp()
-      }
-    );
-
-    messageInput.value = "";
-
-  } catch (error) {
-
-    console.error(
-      "Send message error:",
-      error
-    );
-
-    alert("Message send नहीं हुआ।");
-
-  }
-
-}
+</html>
