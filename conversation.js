@@ -16,6 +16,8 @@ import {
 
 const friendName =
   document.getElementById("friendName");
+const friendStatus =
+  document.getElementById("friendStatus");
 
 const messagesDiv =
   document.getElementById("messages");
