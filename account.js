@@ -20,61 +20,58 @@ const accountEmail =
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-
-    window.location.href =
-      "index.html";
-
+    window.location.href = "index.html";
     return;
-
   }
-
 
   // Email
   accountEmail.textContent =
-    user.email || "No email";
+    user.email || "";
 
 
+  let name = "";
+
+
+  // Firebase Authentication का नाम
+  if (user.displayName) {
+    name = user.displayName;
+  }
+
+
+  // Firestore से नाम
   try {
 
     const userRef =
-      doc(
-        db,
-        "users",
-        user.uid
-      );
+      doc(db, "users", user.uid);
 
-
-    const snapshot =
+    const snap =
       await getDoc(userRef);
 
 
-    if (snapshot.exists()) {
+    if (snap.exists()) {
 
-      const data =
-        snapshot.data();
+      const data = snap.data();
 
-
-      accountName.textContent =
-        data.name || "User";
-
-    } else {
-
-      accountName.textContent =
-        "User";
+      name =
+        data.name ||
+        data.username ||
+        data.displayName ||
+        data.fullName ||
+        name;
 
     }
-
 
   } catch (error) {
 
     console.error(
-      "Account error:",
+      "Name loading error:",
       error
     );
 
-    accountName.textContent =
-      "User";
-
   }
+
+
+  accountName.textContent =
+    name || "User";
 
 });
