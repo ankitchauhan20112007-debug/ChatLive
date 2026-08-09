@@ -13,11 +13,6 @@ import {
 const friendsDiv = document.getElementById("friends");
 
 
-if (!friendsDiv) {
-  console.error("friends element नहीं मिला");
-}
-
-
 // Login check
 onAuthStateChanged(auth, (user) => {
 
@@ -27,10 +22,8 @@ onAuthStateChanged(auth, (user) => {
         Please login first.
       </p>
     `;
-
     return;
   }
-
 
   loadFriends();
 
@@ -55,7 +48,7 @@ function loadFriends() {
         const data = userDoc.data();
 
 
-        // अपना account hide करो
+        // अपना account hide
         if (
           auth.currentUser &&
           userDoc.id === auth.currentUser.uid
@@ -67,45 +60,88 @@ function loadFriends() {
         count++;
 
 
-        const card =
-          document.createElement("div");
-
+        const card = document.createElement("div");
 
         card.style.cssText = `
-          background:white;
+          background:#fff;
           margin:12px 0;
-          padding:15px;
+          padding:14px;
           border-radius:18px;
           display:flex;
           align-items:center;
           gap:12px;
-          box-shadow:0 2px 8px rgba(0,0,0,0.12);
+          box-shadow:0 2px 8px rgba(0,0,0,.12);
           cursor:pointer;
         `;
 
 
-        const photo =
-          data.photo ||
-          "https://via.placeholder.com/60";
+        // Profile photo
+        const photo = data.photo || "";
 
 
-        const dot =
+        let avatar = "";
+
+        if (photo) {
+
+          avatar = `
+            <img
+              src="${photo}"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+              style="
+                width:60px;
+                height:60px;
+                border-radius:50%;
+                object-fit:cover;
+                flex-shrink:0;
+              "
+            >
+
+            <div style="
+              display:none;
+              width:60px;
+              height:60px;
+              border-radius:50%;
+              background:#ddd;
+              align-items:center;
+              justify-content:center;
+              font-size:28px;
+              flex-shrink:0;
+            ">
+              👤
+            </div>
+          `;
+
+        } else {
+
+          avatar = `
+            <div style="
+              width:60px;
+              height:60px;
+              border-radius:50%;
+              background:#ddd;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              font-size:28px;
+              flex-shrink:0;
+            ">
+              👤
+            </div>
+          `;
+
+        }
+
+
+        // सिर्फ dot
+        const dotColor =
           data.online === true
-          ? "green"
-          : "#d3d3d3";
+            ? "#00a000"
+            : "#d3d3d3";
 
 
         card.innerHTML = `
 
-          <img
-            src="${photo}"
-            style="
-              width:60px;
-              height:60px;
-              border-radius:50%;
-              object-fit:cover;
-            "
-          >
+          ${avatar}
 
 
           <div style="flex:1;">
@@ -113,22 +149,24 @@ function loadFriends() {
             <div style="
               font-size:18px;
               font-weight:bold;
+              color:#222;
             ">
               ${data.name || "User"}
             </div>
 
 
-            <div style="margin-top:6px;">
+            <div style="
+              margin-top:7px;
+              height:10px;
+            ">
 
-              <span
-                style="
-                  display:inline-block;
-                  width:10px;
-                  height:10px;
-                  border-radius:50%;
-                  background:${dot};
-                "
-              ></span>
+              <span style="
+                display:inline-block;
+                width:10px;
+                height:10px;
+                border-radius:50%;
+                background:${dotColor};
+              "></span>
 
             </div>
 
@@ -136,7 +174,7 @@ function loadFriends() {
 
 
           <div style="
-            font-size:24px;
+            font-size:25px;
           ">
             💬
           </div>
@@ -199,9 +237,9 @@ function loadFriends() {
       friendsDiv.innerHTML = `
         <div style="
           background:#ffe5e5;
+          color:#b00000;
           padding:15px;
           border-radius:12px;
-          color:#b00000;
         ">
           ❌ Friends load नहीं हुए।
           <br><br>
