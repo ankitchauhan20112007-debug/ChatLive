@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ChatLive Notifications</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>🔔 Notifications</h2>
+
+  <div class="setting-item">
+    🔔
+    <span>Message Notifications</span>
+
+    <label style="margin-left:auto;">
+      <input
+        type="checkbox"
+        id="messageNotifications"
+        checked
+      >
+    </label>
+  </div>
+
+  <div class="setting-item">
+    👥
+    <span>Friend Notifications</span>
+
+    <label style="margin-left:auto;">
+      <input
+        type="checkbox"
+        id="friendNotifications"
+        checked
+      >
+    </label>
+  </div>
+
+  <br>
+
+  <a
+    href="settings.html"
+    style="
+      display:block;
+      text-align:center;
+      padding:14px;
+      background:#075E54;
+      color:white;
+      text-decoration:none;
+      border-radius:12px;
+      font-weight:bold;
+    "
+  >
+    ← Back to Settings
+  </a>
+
+</div>
+
+<div class="navbar">
+
+  <a href="home.html">🏠</a>
+
+  <a href="post.html">📸</a>
+
+  <a href="chat.html">💬</a>
+
+  <a href="profile.html">👤</a>
+
+</div>
+
+<script>
+  const messageNotifications =
+    document.getElementById("messageNotifications");
+
+  const friendNotifications =
+    document.getElementById("friendNotifications");
+
+
+  messageNotifications.checked =
+    localStorage.getItem("messageNotifications")
+    !== "
