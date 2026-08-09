@@ -42,20 +42,30 @@
 
   <div style="display:flex;gap:8px;align-items:center;">
 
-  <input
-    type="file"
-    id="chatPhoto"
-    accept="image/*"
-    style="display:none;"
-  >
+  <label
+  for="chatPhoto"
+  style="
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:45px;
+    height:45px;
+    background:#075E54;
+    color:white;
+    border-radius:50%;
+    font-size:22px;
+    cursor:pointer;
+  "
+>
+  📷
+</label>
 
-  <button
-    id="photoBtn"
-    type="button"
-    style="font-size:22px;"
-  >
-    📷
-  </button>
+<input
+  type="file"
+  id="chatPhoto"
+  accept="image/*"
+  style="display:none;"
+>
 
   <input
     type="text"
