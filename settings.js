@@ -8,30 +8,78 @@ import {
 const logoutBtn =
   document.getElementById("logoutBtn");
 
+const logoutMsg =
+  document.getElementById("logoutMsg");
 
-if (logoutBtn) {
+
+if (!logoutBtn) {
+
+  console.error(
+    "Logout button नहीं मिला"
+  );
+
+} else {
+
 
   logoutBtn.addEventListener(
     "click",
     async () => {
 
-      const confirmLogout =
-        confirm("क्या आप Logout करना चाहते हैं?");
 
-      if (!confirmLogout) {
-        return;
-      }
+      logoutBtn.style.pointerEvents =
+        "none";
+
+
+      logoutBtn.style.opacity =
+        "0.6";
+
+
+      logoutMsg.textContent =
+        "Logging out...";
+
 
       try {
 
+
         await signOut(auth);
 
-        window.location.href =
-          "index.html";
+
+        logoutMsg.textContent =
+          "Logout successful ✅";
+
+
+        setTimeout(
+          () => {
+
+            window.location.replace(
+              "index.html"
+            );
+
+          },
+          500
+        );
+
 
       } catch (error) {
 
-        console.error(error);
+
+        console.error(
+          "Logout error:",
+          error
+        );
+
+
+        logoutBtn.style.pointerEvents =
+          "auto";
+
+
+        logoutBtn.style.opacity =
+          "1";
+
+
+        logoutMsg.textContent =
+          "Logout failed ❌";
+
 
         alert(
           "Logout नहीं हुआ:\n" +
