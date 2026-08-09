@@ -40,18 +40,38 @@
     ">
   </div>
 
-  <div style="display:flex;gap:8px;">
+  <div style="display:flex;gap:8px;align-items:center;">
 
-    <input
-      type="text"
-      id="message"
-      placeholder="Type a message..."
-      style="flex:1;"
-    >
+  <input
+    type="file"
+    id="chatPhoto"
+    accept="image/*"
+    style="display:none;"
+  >
 
-    <button id="sendBtn">Send</button>
+  <button
+    id="photoBtn"
+    type="button"
+    style="font-size:22px;"
+  >
+    📷
+  </button>
 
-  </div>
+  <input
+    type="text"
+    id="message"
+    placeholder="Type a message..."
+    style="flex:1;"
+  >
+
+  <button
+    id="sendBtn"
+    type="button"
+  >
+    Send
+  </button>
+
+</div>
 
 </div>
 
