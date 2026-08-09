@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ChatLive Privacy</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>🔒 Privacy</h2>
+
+  <div class="setting-item">
+    🟢
+    <span>Show Online Status</span>
+
+    <label style="margin-left:auto;">
+      <input
+        type="checkbox"
+        id="onlineStatus"
+        checked
+      >
+    </label>
+  </div>
+
+
+  <div class="setting-item">
+    👤
+    <span>Show Profile Photo</span>
+
+    <label style="margin-left:auto;">
+      <input
+        type="checkbox"
+        id="profilePhoto"
+        checked
+      >
+    </label>
+  </div>
+
+
+  <div class="setting-item">
+    💬
+    <span>Allow Messages</span>
+
+    <label style="margin-left:auto;">
+      <input
+        type="checkbox"
+        id="allowMessages"
+        checked
+      >
+    </label>
+  </div>
+
+
+  <br>
+
+
+  <a
+    href="settings.html"
+    style="
+      display:block;
+      text-align:center;
+      padding:14px;
+      background:#075E54;
+      color:white;
+      text-decoration:none;
+      border-radius:12px;
+      font-weight:bold;
+    "
+  >
+    ← Back to Settings
+  </a>
+
+</div>
+
+
+<div class="navbar">
+
+  <a href="home.html">🏠</a>
+
+  <a href="post.html">📸</a>
+
+  <a href="chat.html">💬</a>
+
+  <a href="profile.html">👤</a>
+
+</div>
+
+
+<script>
+
+  const onlineStatus =
+    document.getElementById("onlineStatus");
+
+  const profilePhoto =
+    document.getElementById("profilePhoto");
+
+  const allowMessages =
+    document.getElementById("allowMessages");
+
+
+  onlineStatus.checked =
+    localStorage.getItem("onlineStatus")
+    !== "false";
+
+
+  profilePhoto.checked =
+    localStorage.getItem("profilePhoto")
+    !== "false";
+
+
+  allowMessages.checked =
+    localStorage.getItem("allowMessages")
+    !== "false";
+
+
+  onlineStatus.addEventListener(
+    "change",
+    () => {
+
+      localStorage.setItem(
+        "onlineStatus",
+        onlineStatus.checked
+      );
+
+    }
+  );
+
+
+  profilePhoto.addEventListener(
+    "change",
+    () => {
+
+      localStorage.setItem(
+        "profilePhoto",
+        profilePhoto.checked
+      );
+
+    }
+  );
+
+
+  allowMessages.addEventListener(
+    "change",
+    () => {
+
+      localStorage.setItem(
+        "allowMessages",
+        allowMessages.checked
+      );
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
