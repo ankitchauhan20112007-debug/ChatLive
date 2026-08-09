@@ -391,8 +391,6 @@ chatPhoto.addEventListener("change", async () => {
   }
 
 });
-
-
     try {
 
       photoBtn.textContent =
