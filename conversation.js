@@ -311,35 +311,86 @@ photoBtn.addEventListener(
 // =========================
 // PHOTO SELECT
 // =========================
+chatPhoto.addEventListener("change", async () => {
 
-chatPhoto.addEventListener(
-  "change",
-  async () => {
+  const file = chatPhoto.files[0];
 
-    const file =
-      chatPhoto.files[0];
+  if (!file) return;
 
+  if (!currentUser) {
+    alert("Please login first");
+    return;
+  }
 
-    if (!file) return;
+  try {
 
+    alert("Photo uploading...");
 
-    if (!currentUser) {
-      alert("Please login first");
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "swlqxqgn");
+
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const result = await response.json();
+
+    console.log("Cloudinary result:", result);
+
+    if (!result.secure_url) {
+
+      console.error(result);
+
+      alert("Photo upload failed");
+
       return;
     }
 
+    const chatId = getChatId(
+      currentUser.uid,
+      friendUid
+    );
 
-    // 10 MB limit
-    if (file.size > 10 * 1024 * 1024) {
+    await addDoc(
+      collection(
+        db,
+        "chats",
+        chatId,
+        "messages"
+      ),
+      {
+        image: result.secure_url,
+        sender: currentUser.uid,
+        receiver: friendUid,
+        time: serverTimestamp()
+      }
+    );
 
-      alert(
-        "Photo 10 MB से छोटी होनी चाहिए।"
-      );
+    alert("Photo sent ✅");
 
-      chatPhoto.value = "";
+    chatPhoto.value = "";
 
-      return;
-    }
+  } catch (error) {
+
+    console.error(
+      "PHOTO ERROR:",
+      error
+    );
+
+    alert(
+      "Photo send नहीं हुई:\n" +
+      error.message
+    );
+
+  }
+
+});
 
 
     try {
