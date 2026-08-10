@@ -3,7 +3,11 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>ChatLive Profile</title>
 
@@ -15,30 +19,59 @@
 <div class="container">
 
   <h2>👤 My Profile</h2>
-<a
-  href="settings.html"
-  style="
-    display:block;
-    text-decoration:none;
-    background:#075E54;
-    color:white;
-    padding:12px;
-    border-radius:12px;
-    text-align:center;
-    margin-bottom:15px;
-    font-weight:bold;
-  "
->
-  ⚙️ Settings
-</a>
 
-  <div style="
-    background:white;
-    padding:20px;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 2px 10px rgba(0,0,0,.15);
-  ">
+
+  <!-- Settings -->
+
+  <a
+    href="settings.html"
+    style="
+      display:block;
+      text-decoration:none;
+      background:#075E54;
+      color:white;
+      padding:12px;
+      border-radius:12px;
+      text-align:center;
+      margin-bottom:10px;
+      font-weight:bold;
+    "
+  >
+    ⚙️ Settings
+  </a>
+
+
+  <!-- Edit Profile -->
+
+  <a
+    href="edit-profile.html"
+    style="
+      display:block;
+      text-align:center;
+      padding:12px;
+      background:#075E54;
+      color:white;
+      text-decoration:none;
+      border-radius:12px;
+      margin-bottom:15px;
+      font-weight:bold;
+    "
+  >
+    ✏️ Edit Profile
+  </a>
+
+
+  <!-- Profile Card -->
+
+  <div
+    style="
+      background:white;
+      padding:20px;
+      border-radius:20px;
+      text-align:center;
+      box-shadow:0 2px 10px rgba(0,0,0,.15);
+    "
+  >
 
     <img
       id="profilePhoto"
@@ -84,6 +117,8 @@
 </div>
 
 
+<!-- Navbar -->
+
 <div class="navbar">
 
   <a href="home.html">🏠</a>
@@ -97,23 +132,10 @@
 </div>
 
 
-<script type="module" src="profile.js"></script>
-<a
-  href="edit-profile.html"
-  style="
-    display:block;
-    text-align:center;
-    padding:12px;
-    background:#075E54;
-    color:white;
-    text-decoration:none;
-    border-radius:12px;
-    margin:15px 0;
-    font-weight:bold;
-  "
->
-  ✏️ Edit Profile
-</a>
+<script
+  type="module"
+  src="profile.js"
+></script>
 
 </body>
 </html>
