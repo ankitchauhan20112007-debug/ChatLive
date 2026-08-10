@@ -14,11 +14,18 @@ const friendsDiv =
   document.getElementById("friends");
 
 
+if (!friendsDiv) {
+  console.error("friends element नहीं मिला");
+}
+
+
 // =========================
 // LOGIN CHECK
 // =========================
 
 onAuthStateChanged(auth, (user) => {
+
+  console.log("Auth user:", user);
 
   if (!user) {
 
@@ -26,6 +33,7 @@ onAuthStateChanged(auth, (user) => {
       <p style="
         text-align:center;
         color:#777;
+        margin-top:30px;
       ">
         Please login first.
       </p>
@@ -46,10 +54,19 @@ onAuthStateChanged(auth, (user) => {
 
 function loadFriends() {
 
+  console.log("Loading users...");
+
+
   onSnapshot(
     collection(db, "users"),
 
     (snapshot) => {
+
+      console.log(
+        "Users received:",
+        snapshot.size
+      );
+
 
       friendsDiv.innerHTML = "";
 
@@ -86,7 +103,7 @@ function loadFriends() {
 
 
         card.style.cssText = `
-          background:#fff;
+          background:white;
           margin:12px 0;
           padding:14px;
           border-radius:18px;
@@ -95,7 +112,6 @@ function loadFriends() {
           gap:12px;
           box-shadow:0 2px 8px rgba(0,0,0,.12);
           cursor:pointer;
-          user-select:none;
         `;
 
 
@@ -107,66 +123,53 @@ function loadFriends() {
           data.photo || "";
 
 
-        let avatar = "";
+        let avatar;
 
 
         if (photo) {
 
-          avatar = `
+          avatar = document.createElement("img");
 
-            <img
-              src="${photo}"
-              style="
-                width:60px;
-                height:60px;
-                border-radius:50%;
-                object-fit:cover;
-                flex-shrink:0;
-              "
-              onerror="
-                this.style.display='none';
-                this.nextElementSibling.style.display='flex';
-              "
-            >
+          avatar.src = photo;
 
-            <div
-              style="
-                display:none;
-                width:60px;
-                height:60px;
-                border-radius:50%;
-                background:#ddd;
-                align-items:center;
-                justify-content:center;
-                font-size:28px;
-                flex-shrink:0;
-              "
-            >
-              👤
-            </div>
-
+          avatar.style.cssText = `
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            object-fit:cover;
+            flex-shrink:0;
+            background:#ddd;
           `;
+
+
+          avatar.onerror = () => {
+
+            avatar.src =
+              "https://via.placeholder.com/60";
+
+          };
+
 
         } else {
 
-          avatar = `
+          avatar =
+            document.createElement("div");
 
-            <div
-              style="
-                width:60px;
-                height:60px;
-                border-radius:50%;
-                background:#ddd;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:28px;
-                flex-shrink:0;
-              "
-            >
-              👤
-            </div>
 
+          avatar.textContent =
+            "👤";
+
+
+          avatar.style.cssText = `
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            background:#ddd;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            flex-shrink:0;
           `;
 
         }
@@ -178,3 +181,184 @@ function loadFriends() {
 
         const name =
           data.name ||
+          data.username ||
+          data.displayName ||
+          "User";
+
+
+        // =========================
+        // ONLINE DOT
+        // =========================
+
+        const dot =
+          document.createElement("span");
+
+
+        dot.style.cssText = `
+          display:block;
+          width:6px;
+          height:6px;
+          border-radius:50%;
+          background:${
+            data.online === true
+              ? "#00a000"
+              : "#d3d3d3"
+          };
+          margin-top:7px;
+        `;
+
+
+        // =========================
+        // INFO
+        // =========================
+
+        const info =
+          document.createElement("div");
+
+
+        info.style.cssText = `
+          flex:1;
+          min-width:0;
+        `;
+
+
+        const nameDiv =
+          document.createElement("div");
+
+
+        nameDiv.textContent =
+          name;
+
+
+        nameDiv.style.cssText = `
+          font-size:18px;
+          font-weight:bold;
+          color:#222;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        `;
+
+
+        info.appendChild(nameDiv);
+
+        info.appendChild(dot);
+
+
+        // =========================
+        // CHAT ICON
+        // =========================
+
+        const chatIcon =
+          document.createElement("div");
+
+
+        chatIcon.textContent =
+          "💬";
+
+
+        chatIcon.style.cssText = `
+          font-size:25px;
+          flex-shrink:0;
+        `;
+
+
+        // =========================
+        // CARD
+        // =========================
+
+        card.appendChild(avatar);
+
+        card.appendChild(info);
+
+        card.appendChild(chatIcon);
+
+
+        // =========================
+        // OPEN CONVERSATION
+        // =========================
+
+        card.addEventListener(
+          "click",
+          () => {
+
+            localStorage.setItem(
+              "chatFriendUid",
+              userDoc.id
+            );
+
+
+            localStorage.setItem(
+              "chatFriendName",
+              name
+            );
+
+
+            window.location.href =
+              "conversation.html";
+
+          }
+        );
+
+
+        friendsDiv.appendChild(card);
+
+      });
+
+
+      // =========================
+      // NO FRIEND
+      // =========================
+
+      if (count === 0) {
+
+        friendsDiv.innerHTML = `
+          <p style="
+            text-align:center;
+            color:#777;
+            margin-top:30px;
+          ">
+            कोई friend नहीं मिला।
+          </p>
+        `;
+
+      }
+
+    },
+
+
+    // =========================
+    // FIRESTORE ERROR
+    // =========================
+
+    (error) => {
+
+      console.error(
+        "Firestore error:",
+        error
+      );
+
+
+      friendsDiv.innerHTML = `
+        <div style="
+          background:#ffe5e5;
+          color:#b00000;
+          padding:15px;
+          border-radius:12px;
+          margin-top:20px;
+        ">
+
+          ❌ Friends load नहीं हुए।
+
+          <br><br>
+
+          ${error.message}
+
+        </div>
+      `;
+
+    }
+
+  );
+
+}
