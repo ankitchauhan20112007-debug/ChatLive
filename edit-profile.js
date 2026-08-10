@@ -45,20 +45,27 @@ onAuthStateChanged(auth, async (user) => {
 
   }
 
-
   currentUser = user;
 
+  await loadProfile();
 
-  // Load existing profile
+});
+
+
+// =========================
+// LOAD PROFILE
+// =========================
+
+async function loadProfile() {
+
   try {
 
     const userRef =
       doc(
         db,
         "users",
-        user.uid
+        currentUser.uid
       );
-
 
     const snapshot =
       await getDoc(userRef);
@@ -86,7 +93,6 @@ onAuthStateChanged(auth, async (user) => {
 
     }
 
-
   } catch (error) {
 
     console.error(
@@ -94,13 +100,16 @@ onAuthStateChanged(auth, async (user) => {
       error
     );
 
+    status.textContent =
+      "Profile load नहीं हुई ❌";
+
   }
 
-});
+}
 
 
 // =========================
-// PREVIEW PHOTO
+// PHOTO PREVIEW
 // =========================
 
 photoInput.addEventListener(
@@ -113,6 +122,22 @@ photoInput.addEventListener(
 
     if (!file) {
       return;
+    }
+
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+
+      alert(
+        "Photo 10 MB से छोटी होनी चाहिए।"
+      );
+
+      photoInput.value = "";
+
+      return;
+
     }
 
 
@@ -148,3 +173,100 @@ saveBtn.addEventListener(
 
     const name =
       nameInput.value.trim();
+
+
+    if (!name) {
+
+      alert(
+        "Name enter करो"
+      );
+
+      return;
+
+    }
+
+
+    try {
+
+      saveBtn.disabled =
+        true;
+
+      status.textContent =
+        "Saving...";
+
+
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+
+
+      // Existing profile
+      const oldSnapshot =
+        await getDoc(userRef);
+
+
+      let photoURL = "";
+
+
+      if (oldSnapshot.exists()) {
+
+        const oldData =
+          oldSnapshot.data();
+
+
+        photoURL =
+          oldData.photo || "";
+
+      }
+
+
+      // =========================
+      // UPLOAD NEW PHOTO
+      // =========================
+
+      if (photoInput.files[0]) {
+
+        status.textContent =
+          "Photo uploading...";
+
+
+        const formData =
+          new FormData();
+
+
+        formData.append(
+          "file",
+          photoInput.files[0]
+        );
+
+
+        formData.append(
+          "upload_preset",
+          "swlqxqgn"
+        );
+
+
+        const response =
+          await fetch(
+            "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        console.log(
+          "Cloudinary:",
+          result
+        );
+
+
+        if (!result.secure_url) {
