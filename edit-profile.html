@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Edit Profile - ChatLive</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>✏️ Edit Profile</h2>
+
+  <div style="
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+  ">
+
+    <div style="
+      text-align:center;
+      margin-bottom:20px;
+    ">
+
+      <img
+        id="profilePreview"
+        src="https://via.placeholder.com/100"
+        style="
+          width:100px;
+          height:100px;
+          border-radius:50%;
+          object-fit:cover;
+          border:3px solid #075E54;
+        "
+      >
+
+      <br><br>
+
+      <label
+        for="profilePhoto"
+        style="
+          display:inline-block;
+          background:#075E54;
+          color:white;
+          padding:10px 16px;
+          border-radius:10px;
+          cursor:pointer;
+        "
+      >
+        📷 Change Photo
+      </label>
+
+      <input
+        type="file"
+        id="profilePhoto"
+        accept="image/*"
+        style="display:none;"
+      >
+
+    </div>
+
+
+    <label>
+      Name
+    </label>
+
+    <input
+      type="text"
+      id="name"
+      placeholder="Enter your name"
+      style="
+        width:100%;
+        box-sizing:border-box;
+        padding:13px;
+        margin:8px 0 15px;
+        border:1px solid #ddd;
+        border-radius:10px;
+      "
+    >
+
+
+    <button
+      id="saveBtn"
+      type="button"
+      style="
+        width:100%;
+        padding:14px;
+        background:#075E54;
+        color:white;
+        border:none;
+        border-radius:12px;
+        font-size:16px;
+        font-weight:bold;
+      "
+    >
+      💾 Save Profile
+    </button>
+
+
+    <p
+      id="status"
+      style="
+        text-align:center;
+        margin-top:15px;
+      "
+    ></p>
+
+  </div>
+
+
+  <br>
+
+  <a
+    href="profile.html"
+    style="
+      display:block;
+      text-align:center;
+      padding:14px;
+      background:#ddd;
+      color:#222;
+      text-decoration:none;
+      border-radius:12px;
+      font-weight:bold;
+    "
+  >
+    ← Back to Profile
+  </a>
+
+</div>
+
+
+<div class="navbar">
+
+  <a href="home.html">🏠</a>
+
+  <a href="post.html">📸</a>
+
+  <a href="chat.html">💬</a>
+
+  <a href="profile.html">👤</a>
+
+</div>
+
+
+<script
+  type="module"
+  src="./edit-profile.js"
+></script>
+
+</body>
+</html>
