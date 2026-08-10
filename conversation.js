@@ -5,18 +5,21 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
+  doc,
+collection,
+addDoc,
+query,
+orderBy,
+onSnapshot,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
 // =========================
 // ELEMENTS
 // =========================
+const friendStatus =
+  document.getElementById("friendStatus");
 
 const friendName =
   document.getElementById("friendName");
@@ -54,12 +57,10 @@ if (!friendUid) {
 }
 
 
-// Friend name
-if (friendName) {
+// Friend nameif (friendName) {
   friendName.textContent =
-    "💬 " + (savedFriendName || "Friend");
+    savedFriendName || "Friend";
 }
-
 
 // =========================
 // LOGIN
@@ -72,9 +73,65 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  currentUser = user;
+ currentUser = user;
 
-  loadMessages();
+loadFriendStatus();
+async function loadFriendStatus() {
+
+  if (!friendStatus) return;
+
+  const friendRef =
+    doc(
+      db,
+      "users",
+      friendUid
+    );
+
+  onSnapshot(
+    friendRef,
+    (snapshot) => {
+
+      if (!snapshot.exists()) {
+        friendStatus.innerHTML = "";
+        return;
+      }
+
+      const data =
+        snapshot.data();
+
+      const color =
+        data.online === true
+          ? "#00a000"
+          : "#d3d3d3";
+
+      friendStatus.innerHTML = `
+        <span
+          style="
+            display:inline-block;
+            width:6px;
+            height:6px;
+            border-radius:50%;
+            background:${color};
+          "
+        ></span>
+      `;
+
+    },
+    (error) => {
+
+      console.error(
+        "Status error:",
+        error
+      );
+
+      friendStatus.innerHTML = "";
+
+    }
+  );
+
+}
+
+loadMessages();
 
 });
 
