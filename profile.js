@@ -1,4 +1,3 @@
-
 import { auth, db } from "./firebase.js";
 
 import {
@@ -8,7 +7,6 @@ import {
 import {
   doc,
   getDoc,
-  updateDoc,
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -35,42 +33,60 @@ const msg =
 let currentUser = null;
 
 
-// Login check
+// =========================
+// LOGIN CHECK
+// =========================
+
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-    window.location.href = "index.html";
+
+    window.location.href =
+      "index.html";
+
     return;
+
   }
 
   currentUser = user;
 
   emailText.textContent =
-    user.email;
+    user.email || "";
 
   await loadProfile();
 
 });
 
 
-// Profile load
+// =========================
+// LOAD PROFILE
+// =========================
+
 async function loadProfile() {
 
   try {
 
     const userRef =
-      doc(db, "users", currentUser.uid);
+      doc(
+        db,
+        "users",
+        currentUser.uid
+      );
+
 
     const snap =
       await getDoc(userRef);
+
 
     if (snap.exists()) {
 
       const data =
         snap.data();
 
+
       nameInput.value =
         data.name || "";
+
 
       if (data.photo) {
 
@@ -81,19 +97,26 @@ async function loadProfile() {
 
     }
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Load error:",
+      error
+    );
 
     msg.textContent =
-      "Profile load नहीं हुई";
+      "Profile load नहीं हुई ❌";
 
   }
 
 }
 
 
-// Photo preview
+// =========================
+// PHOTO PREVIEW
+// =========================
+
 photoInput.addEventListener(
   "change",
   () => {
@@ -101,10 +124,31 @@ photoInput.addEventListener(
     const file =
       photoInput.files[0];
 
-    if (!file) return;
+
+    if (!file) {
+      return;
+    }
+
+
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
+
+      alert(
+        "Photo 10 MB से छोटी होनी चाहिए।"
+      );
+
+      photoInput.value = "";
+
+      return;
+
+    }
+
 
     const reader =
       new FileReader();
+
 
     reader.onload =
       (event) => {
@@ -114,36 +158,79 @@ photoInput.addEventListener(
 
       };
 
+
     reader.readAsDataURL(file);
 
   }
 );
 
 
-// Save profile
+// =========================
+// SAVE PROFILE
+// =========================
+
 saveProfile.addEventListener(
   "click",
   async () => {
 
-    msg.textContent =
-      "Saving...";
+    if (!currentUser) {
+
+      alert(
+        "Please login first"
+      );
+
+      return;
+
+    }
+
+
+    const name =
+      nameInput.value.trim();
+
+
+    if (!name) {
+
+      alert(
+        "Name enter करो"
+      );
+
+      return;
+
+    }
+
 
     try {
+
+      saveProfile.disabled =
+        true;
+
+      msg.textContent =
+        "Saving...";
+
 
       let photoURL =
         profilePhoto.src;
 
 
-      // New photo selected
+      // =========================
+      // UPLOAD NEW PHOTO
+      // =========================
+
       if (photoInput.files[0]) {
+
+        msg.textContent =
+          "Photo uploading...";
+
 
         const formData =
           new FormData();
+
 
         formData.append(
           "file",
           photoInput.files[0]
         );
+
 
         formData.append(
           "upload_preset",
@@ -151,7 +238,7 @@ saveProfile.addEventListener(
         );
 
 
-        const upload =
+        const response =
           await fetch(
             "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
             {
@@ -161,13 +248,20 @@ saveProfile.addEventListener(
           );
 
 
-        const image =
-          await upload.json();
+        const result =
+          await response.json();
 
 
-        if (!image.secure_url) {
+        console.log(
+          "Cloudinary result:",
+          result
+        );
+
+
+        if (!result.secure_url) {
 
           throw new Error(
+            result.error?.message ||
             "Photo upload failed"
           );
 
@@ -175,10 +269,14 @@ saveProfile.addEventListener(
 
 
         photoURL =
-          image.secure_url;
+          result.secure_url;
 
       }
 
+
+      // =========================
+      // FIRESTORE
+      // =========================
 
       const userRef =
         doc(
@@ -191,19 +289,20 @@ saveProfile.addEventListener(
       await setDoc(
         userRef,
         {
-          uid: currentUser.uid,
+          uid:
+            currentUser.uid,
 
           name:
-            nameInput.value.trim() ||
-            "User",
+            name,
 
           email:
-            currentUser.email,
+            currentUser.email || "",
 
           photo:
             photoURL,
 
-          online: true
+          online:
+            true
         },
         {
           merge: true
@@ -211,23 +310,38 @@ saveProfile.addEventListener(
       );
 
 
+      // =========================
+      // SUCCESS
+      // =========================
+
       profilePhoto.src =
         photoURL;
+
+
+      photoInput.value =
+        "";
 
 
       msg.textContent =
         "✅ Profile Saved";
 
 
-      photoInput.value = "";
-
-
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Save error:",
+        error
+      );
+
 
       msg.textContent =
         "❌ " + error.message;
+
+
+    } finally {
+
+      saveProfile.disabled =
+        false;
 
     }
 
