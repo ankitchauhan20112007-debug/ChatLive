@@ -30,87 +30,93 @@ const status =
 let currentUser = null;
 
 
-// =========================
-// LOGIN
-// =========================
+// ===============================
+// CHECK LOGIN
+// ===============================
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
 
-    window.location.href =
-      "index.html";
+    window.location.href = "index.html";
 
     return;
-
   }
 
   currentUser = user;
+
+  status.textContent = "Loading profile...";
 
   await loadProfile();
 
 });
 
 
-// =========================
-// LOAD PROFILE
-// =========================
+// ===============================
+// LOAD SAVED PROFILE
+// ===============================
 
 async function loadProfile() {
 
   try {
 
-    const userRef =
-      doc(
-        db,
-        "users",
-        currentUser.uid
-      );
+    const userRef = doc(
+      db,
+      "users",
+      currentUser.uid
+    );
 
     const snapshot =
       await getDoc(userRef);
 
 
-    if (snapshot.exists()) {
+    if (!snapshot.exists()) {
 
-      const data =
-        snapshot.data();
+      status.textContent =
+        "Profile data नहीं मिली";
 
-
-      nameInput.value =
-        data.name ||
-        data.username ||
-        data.displayName ||
-        "";
+      return;
+    }
 
 
-      if (data.photo) {
+    const data =
+      snapshot.data();
 
-        preview.src =
-          data.photo;
 
-      }
+    // Name
+    nameInput.value =
+      data.name || "User";
+
+
+    // Photo
+    if (data.photo) {
+
+      preview.src =
+        data.photo;
 
     }
+
+
+    status.textContent = "";
 
   } catch (error) {
 
     console.error(
-      "Profile loading error:",
+      "LOAD PROFILE ERROR:",
       error
     );
 
     status.textContent =
-      "Profile load नहीं हुई ❌";
+      "❌ " + error.message;
 
   }
 
 }
 
 
-// =========================
+// ===============================
 // PHOTO PREVIEW
-// =========================
+// ===============================
 
 photoInput.addEventListener(
   "change",
@@ -120,9 +126,7 @@ photoInput.addEventListener(
       photoInput.files[0];
 
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
 
     if (
@@ -137,24 +141,23 @@ photoInput.addEventListener(
       photoInput.value = "";
 
       return;
-
     }
 
 
-    const imageUrl =
+    const imageURL =
       URL.createObjectURL(file);
 
 
     preview.src =
-      imageUrl;
+      imageURL;
 
   }
 );
 
 
-// =========================
+// ===============================
 // SAVE PROFILE
-// =========================
+// ===============================
 
 saveBtn.addEventListener(
   "click",
@@ -167,7 +170,6 @@ saveBtn.addEventListener(
       );
 
       return;
-
     }
 
 
@@ -182,14 +184,12 @@ saveBtn.addEventListener(
       );
 
       return;
-
     }
 
 
     try {
 
-      saveBtn.disabled =
-        true;
+      saveBtn.disabled = true;
 
       status.textContent =
         "Saving...";
@@ -223,14 +223,18 @@ saveBtn.addEventListener(
       }
 
 
-      // =========================
-      // UPLOAD NEW PHOTO
-      // =========================
+      // ===============================
+      // NEW PHOTO UPLOAD
+      // ===============================
 
       if (photoInput.files[0]) {
 
         status.textContent =
           "Photo uploading...";
+
+
+        const file =
+          photoInput.files[0];
 
 
         const formData =
@@ -239,7 +243,7 @@ saveBtn.addEventListener(
 
         formData.append(
           "file",
-          photoInput.files[0]
+          file
         );
 
 
@@ -264,9 +268,108 @@ saveBtn.addEventListener(
 
 
         console.log(
-          "Cloudinary:",
+          "Cloudinary result:",
           result
         );
 
 
         if (!result.secure_url) {
+
+          throw new Error(
+            result.error?.message ||
+            "Photo upload failed"
+          );
+
+        }
+
+
+        photoURL =
+          result.secure_url;
+
+      }
+
+
+      // ===============================
+      // SAVE TO FIRESTORE
+      // ===============================
+
+      await setDoc(
+        userRef,
+        {
+          uid:
+            currentUser.uid,
+
+          name:
+            name,
+
+          email:
+            currentUser.email || "",
+
+          photo:
+            photoURL,
+
+          online:
+            true
+        },
+        {
+          merge: true
+        }
+      );
+
+
+      // Update screen
+      nameInput.value =
+        name;
+
+
+      if (photoURL) {
+
+        preview.src =
+          photoURL;
+
+      }
+
+
+      photoInput.value =
+        "";
+
+
+      status.textContent =
+        "✅ Profile Saved";
+
+
+      saveBtn.disabled =
+        false;
+
+
+      // Go back after save
+      setTimeout(
+        () => {
+
+          window.location.href =
+            "profile.html";
+
+        },
+        1000
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "SAVE PROFILE ERROR:",
+        error
+      );
+
+
+      status.textContent =
+        "❌ " + error.message;
+
+
+      saveBtn.disabled =
+        false;
+
+    }
+
+  }
+);
