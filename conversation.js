@@ -6,6 +6,7 @@ import {
 
 import {
   doc,
+  getDoc,
   collection,
   addDoc,
   query,
@@ -15,15 +16,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
-// =========================
+// ======================================
 // ELEMENTS
-// =========================
-
-const friendStatus =
-  document.getElementById("friendStatus");
+// ======================================
 
 const friendName =
   document.getElementById("friendName");
+
+const friendPhoto =
+  document.getElementById("friendPhoto");
+
+const friendStatus =
+  document.getElementById("friendStatus");
 
 const messagesDiv =
   document.getElementById("messages");
@@ -38,9 +42,9 @@ const chatPhoto =
   document.getElementById("chatPhoto");
 
 
-// =========================
+// ======================================
 // FRIEND
-// =========================
+// ======================================
 
 const friendUid =
   localStorage.getItem("chatFriendUid");
@@ -48,12 +52,13 @@ const friendUid =
 const savedFriendName =
   localStorage.getItem("chatFriendName");
 
+
 let currentUser = null;
 
 
-// =========================
+// ======================================
 // CHECK FRIEND
-// =========================
+// ======================================
 
 if (!friendUid) {
 
@@ -63,9 +68,9 @@ if (!friendUid) {
 }
 
 
-// =========================
+// ======================================
 // FRIEND NAME
-// =========================
+// ======================================
 
 if (friendName) {
 
@@ -75,13 +80,26 @@ if (friendName) {
 }
 
 
-// =========================
+// ======================================
+// CHAT ID
+// ======================================
+
+function getChatId(uid1, uid2) {
+
+  return [uid1, uid2]
+    .sort()
+    .join("_");
+
+}
+
+
+// ======================================
 // LOGIN
-// =========================
+// ======================================
 
 onAuthStateChanged(
   auth,
-  (user) => {
+  async (user) => {
 
     if (!user) {
 
@@ -92,9 +110,16 @@ onAuthStateChanged(
 
     }
 
-    currentUser = user;
+
+    currentUser =
+      user;
+
+
+    await loadFriend();
+
 
     loadFriendStatus();
+
 
     loadMessages();
 
@@ -102,31 +127,74 @@ onAuthStateChanged(
 );
 
 
-// =========================
-// CHAT ID
-// =========================
+// ======================================
+// LOAD FRIEND PROFILE
+// ======================================
 
-function getChatId(uid1, uid2) {
+async function loadFriend() {
 
-  return [
-    uid1,
-    uid2
-  ]
-    .sort()
-    .join("_");
+  try {
+
+    const friendRef =
+      doc(
+        db,
+        "users",
+        friendUid
+      );
+
+
+    const snapshot =
+      await getDoc(friendRef);
+
+
+    if (!snapshot.exists()) {
+
+      return;
+
+    }
+
+
+    const data =
+      snapshot.data();
+
+
+    if (friendName) {
+
+      friendName.textContent =
+        data.name || "Friend";
+
+    }
+
+
+    if (friendPhoto && data.photo) {
+
+      friendPhoto.src =
+        data.photo;
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Friend profile error:",
+      error
+    );
+
+  }
 
 }
 
 
-// =========================
-// FRIEND STATUS
-// =========================
+// ======================================
+// FRIEND ONLINE STATUS
+// ======================================
 
 function loadFriendStatus() {
 
   if (!friendStatus) {
     return;
   }
+
 
   const friendRef =
     doc(
@@ -135,6 +203,7 @@ function loadFriendStatus() {
       friendUid
     );
 
+
   onSnapshot(
     friendRef,
 
@@ -142,32 +211,39 @@ function loadFriendStatus() {
 
       if (!snapshot.exists()) {
 
-        friendStatus.innerHTML =
+        friendStatus.textContent =
           "";
 
         return;
 
       }
 
+
       const data =
         snapshot.data();
 
-      const color =
-        data.online === true
-          ? "#00a000"
-          : "#d3d3d3";
 
-      friendStatus.innerHTML = `
-        <span
-          style="
-            display:inline-block;
-            width:6px;
-            height:6px;
-            border-radius:50%;
-            background:${color};
-          "
-        ></span>
-      `;
+      if (data.online === true) {
+
+        friendStatus.innerHTML = `
+          <span style="
+            color:#25D366;
+            font-size:11px;
+          ">●</span>
+          online
+        `;
+
+      } else {
+
+        friendStatus.innerHTML = `
+          <span style="
+            color:#ccc;
+            font-size:11px;
+          ">●</span>
+          offline
+        `;
+
+      }
 
     },
 
@@ -178,9 +254,6 @@ function loadFriendStatus() {
         error
       );
 
-      friendStatus.innerHTML =
-        "";
-
     }
 
   );
@@ -188,9 +261,9 @@ function loadFriendStatus() {
 }
 
 
-// =========================
+// ======================================
 // LOAD MESSAGES
-// =========================
+// ======================================
 
 function loadMessages() {
 
@@ -200,6 +273,7 @@ function loadMessages() {
       friendUid
     );
 
+
   const messagesRef =
     collection(
       db,
@@ -207,6 +281,7 @@ function loadMessages() {
       chatId,
       "messages"
     );
+
 
   const messagesQuery =
     query(
@@ -217,6 +292,7 @@ function loadMessages() {
       )
     );
 
+
   onSnapshot(
 
     messagesQuery,
@@ -226,22 +302,23 @@ function loadMessages() {
       messagesDiv.innerHTML =
         "";
 
+
       snapshot.forEach(
         (messageDoc) => {
 
           const data =
             messageDoc.data();
 
+
           showMessage(
-            data,
-            messageDoc.id
+            data
           );
 
         }
       );
 
-      messagesDiv.scrollTop =
-        messagesDiv.scrollHeight;
+
+      scrollToBottom();
 
     },
 
@@ -252,13 +329,12 @@ function loadMessages() {
         error
       );
 
+
       messagesDiv.innerHTML = `
-        <p
-          style="
-            color:red;
-            padding:10px;
-          "
-        >
+        <p style="
+          color:red;
+          padding:15px;
+        ">
           ❌ Chat load नहीं हुई।
           <br><br>
           ${error.message}
@@ -272,75 +348,544 @@ function loadMessages() {
 }
 
 
-// =========================
+// ======================================
 // SHOW MESSAGE
-// =========================
+// ======================================
 
-function showMessage(
-  data,
-  messageId
-) {
+function showMessage(data) {
 
   const box =
     document.createElement("div");
+
 
   const isMine =
     data.sender ===
     currentUser.uid;
 
-  box.dataset.messageId =
-    messageId;
 
-  box.style.cssText = `
-    margin:8px 0;
-    padding:10px;
-    border-radius:15px;
-    max-width:75%;
-    margin-left:${isMine ? "auto" : "0"};
-    background:${isMine ? "#dcf8c6" : "#ffffff"};
-    box-shadow:0 1px 3px rgba(0,0,0,.15);
-    word-break:break-word;
-  `;
+  box.className =
+    "message-box " +
+    (
+      isMine
+        ? "my-message"
+        : "friend-message"
+    );
 
 
-  // =========================
-  // PHOTO
-  // =========================
-
-  if (data.image) {
-
-    const img =
-      document.createElement("img");
-
-    img.src =
-      data.image;
-
-    img.alt =
-      "Photo";
-
-    img.style.cssText = `
-      width:100%;
-      max-width:280px;
-      border-radius:12px;
-      display:block;
-      object-fit:cover;
-    `;
-
-    box.appendChild(img);
-
-  }
-
-
-  // =========================
+  // ==================================
   // TEXT
-  // =========================
+  // ==================================
 
   if (data.text) {
 
     const text =
       document.createElement("div");
 
+
     text.textContent =
       data.text;
 
-    text
+
+    box.appendChild(
+      text
+    );
+
+  }
+
+
+  // ==================================
+  // IMAGE
+  // ==================================
+
+  if (data.image) {
+
+    const img =
+      document.createElement("img");
+
+
+    img.src =
+      data.image;
+
+
+    img.className =
+      "message-image";
+
+
+    img.alt =
+      "Photo";
+
+
+    if (data.text) {
+
+      img.style.marginTop =
+        "8px";
+
+    }
+
+
+    box.appendChild(
+      img
+    );
+
+  }
+
+
+  // ==================================
+  // TIME
+  // ==================================
+
+  const bottom =
+    document.createElement("div");
+
+
+  bottom.className =
+    "message-time";
+
+
+  let timeText =
+    "";
+
+
+  if (data.time) {
+
+    try {
+
+      const date =
+        data.time.toDate();
+
+
+      timeText =
+        date.toLocaleTimeString(
+          [],
+          {
+            hour: "numeric",
+            minute: "2-digit"
+          }
+        );
+
+    } catch (e) {
+
+      timeText =
+        "";
+
+    }
+
+  }
+
+
+  bottom.textContent =
+    timeText;
+
+
+  // ==================================
+  // DOUBLE TICK
+  // ==================================
+
+  if (isMine) {
+
+    const ticks =
+      document.createElement("span");
+
+
+    ticks.className =
+      "ticks";
+
+
+    ticks.textContent =
+      "✓✓";
+
+
+    bottom.appendChild(
+      ticks
+    );
+
+  }
+
+
+  box.appendChild(
+    bottom
+  );
+
+
+  messagesDiv.appendChild(
+    box
+  );
+
+}
+
+
+// ======================================
+// SCROLL BOTTOM
+// ======================================
+
+function scrollToBottom() {
+
+  setTimeout(
+    () => {
+
+      messagesDiv.scrollTop =
+        messagesDiv.scrollHeight;
+
+    },
+    50
+  );
+
+}
+
+
+// ======================================
+// SEND BUTTON
+// ======================================
+
+sendBtn.addEventListener(
+  "click",
+  sendMessage
+);
+
+
+// ======================================
+// ENTER TO SEND
+// ======================================
+
+messageInput.addEventListener(
+  "keydown",
+  (event) => {
+
+    if (
+      event.key === "Enter"
+    ) {
+
+      event.preventDefault();
+
+      sendMessage();
+
+    }
+
+  }
+);
+
+
+// ======================================
+// SEND TEXT MESSAGE
+// ======================================
+
+async function sendMessage() {
+
+  const text =
+    messageInput.value.trim();
+
+
+  if (!text) {
+
+    return;
+
+  }
+
+
+  if (!currentUser) {
+
+    alert(
+      "Please login first"
+    );
+
+    return;
+
+  }
+
+
+  if (!friendUid) {
+
+    alert(
+      "Friend select नहीं है"
+    );
+
+    return;
+
+  }
+
+
+  // ==================================
+  // SAVE ORIGINAL TEXT
+  // ==================================
+
+  const originalText =
+    text;
+
+
+  try {
+
+    sendBtn.disabled =
+      true;
+
+
+    sendBtn.textContent =
+      "Sending...";
+
+
+    // ==================================
+    // CLEAR INPUT ONLY AFTER CLICK
+    // ==================================
+
+    messageInput.value =
+      "";
+
+
+    const chatId =
+      getChatId(
+        currentUser.uid,
+        friendUid
+      );
+
+
+    // ==================================
+    // FIRESTORE
+    // ==================================
+
+    await addDoc(
+
+      collection(
+        db,
+        "chats",
+        chatId,
+        "messages"
+      ),
+
+      {
+
+        text:
+          originalText,
+
+        sender:
+          currentUser.uid,
+
+        receiver:
+          friendUid,
+
+        time:
+          serverTimestamp()
+
+      }
+
+    );
+
+
+    console.log(
+      "Message sent ✅"
+    );
+
+
+    messageInput.focus();
+
+
+  } catch (error) {
+
+    console.error(
+      "MESSAGE ERROR:",
+      error
+    );
+
+
+    // Message failed तो वापस input में
+    messageInput.value =
+      originalText;
+
+
+    alert(
+      "Message send नहीं हुआ:\n\n" +
+      error.message
+    );
+
+  }
+
+
+  sendBtn.disabled =
+    false;
+
+
+  sendBtn.textContent =
+    "Send";
+
+}
+
+
+// ======================================
+// SEND PHOTO
+// ======================================
+
+if (chatPhoto) {
+
+  chatPhoto.addEventListener(
+    "change",
+    sendPhoto
+  );
+
+}
+
+
+async function sendPhoto() {
+
+  const file =
+    chatPhoto.files[0];
+
+
+  if (!file) {
+
+    return;
+
+  }
+
+
+  if (!currentUser) {
+
+    alert(
+      "Please login first"
+    );
+
+    return;
+
+  }
+
+
+  // ==================================
+  // SIZE LIMIT
+  // ==================================
+
+  if (
+    file.size >
+    10 * 1024 * 1024
+  ) {
+
+    alert(
+      "Photo 10 MB से छोटी होनी चाहिए।"
+    );
+
+
+    chatPhoto.value =
+      "";
+
+
+    return;
+
+  }
+
+
+  try {
+
+    // ==================================
+    // CLOUDINARY
+    // ==================================
+
+    const formData =
+      new FormData();
+
+
+    formData.append(
+      "file",
+      file
+    );
+
+
+    formData.append(
+      "upload_preset",
+      "swlqxqgn"
+    );
+
+
+    const response =
+      await fetch(
+
+        "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+
+        {
+
+          method:
+            "POST",
+
+          body:
+            formData
+
+        }
+
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.secure_url) {
+
+      throw new Error(
+
+        result.error?.message ||
+        "Photo upload failed"
+
+      );
+
+    }
+
+
+    // ==================================
+    // SAVE IMAGE MESSAGE
+    // ==================================
+
+    const chatId =
+      getChatId(
+        currentUser.uid,
+        friendUid
+      );
+
+
+    await addDoc(
+
+      collection(
+        db,
+        "chats",
+        chatId,
+        "messages"
+      ),
+
+      {
+
+        image:
+          result.secure_url,
+
+        sender:
+          currentUser.uid,
+
+        receiver:
+          friendUid,
+
+        time:
+          serverTimestamp()
+
+      }
+
+    );
+
+
+    chatPhoto.value =
+      "";
+
+
+    console.log(
+      "Photo sent ✅"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "PHOTO ERROR:",
+      error
+    );
+
+
+    alert(
+      "Photo send नहीं हुई:\n\n" +
+      error.message
+    );
+
+  }
+
+}
