@@ -48,19 +48,31 @@ const friendUid =
 const savedFriendName =
   localStorage.getItem("chatFriendName");
 
+
 let currentUser = null;
 
 
-// Friend selected नहीं है
+// =========================
+// CHECK FRIEND
+// =========================
+
 if (!friendUid) {
-  window.location.href = "chat.html";
+
+  window.location.href =
+    "chat.html";
+
 }
 
 
-// Friend name
+// =========================
+// FRIEND NAME
+// =========================
+
 if (friendName) {
+
   friendName.textContent =
     savedFriendName || "Friend";
+
 }
 
 
@@ -68,28 +80,45 @@ if (friendName) {
 // LOGIN
 // =========================
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(
+  auth,
+  (user) => {
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
+    if (!user) {
+
+      window.location.href =
+        "index.html";
+
+      return;
+
+    }
+
+
+    currentUser =
+      user;
+
+
+    loadFriendStatus();
+
+    loadMessages();
+
   }
-
-  currentUser = user;
-
-  loadFriendStatus();
-  loadMessages();
-
-});
+);
 
 
 // =========================
 // CHAT ID
 // =========================
 
-function getChatId(uid1, uid2) {
+function getChatId(
+  uid1,
+  uid2
+) {
 
-  return [uid1, uid2]
+  return [
+    uid1,
+    uid2
+  ]
     .sort()
     .join("_");
 
@@ -102,7 +131,10 @@ function getChatId(uid1, uid2) {
 
 function loadFriendStatus() {
 
-  if (!friendStatus) return;
+  if (!friendStatus) {
+    return;
+  }
+
 
   const friendRef =
     doc(
@@ -111,6 +143,7 @@ function loadFriendStatus() {
       friendUid
     );
 
+
   onSnapshot(
     friendRef,
 
@@ -118,18 +151,23 @@ function loadFriendStatus() {
 
       if (!snapshot.exists()) {
 
-        friendStatus.innerHTML = "";
+        friendStatus.innerHTML =
+          "";
 
         return;
+
       }
+
 
       const data =
         snapshot.data();
+
 
       const color =
         data.online === true
           ? "#00a000"
           : "#d3d3d3";
+
 
       friendStatus.innerHTML = `
         <span
@@ -152,9 +190,11 @@ function loadFriendStatus() {
         error
       );
 
-      friendStatus.innerHTML = "";
+      friendStatus.innerHTML =
+        "";
 
     }
+
   );
 
 }
@@ -172,6 +212,7 @@ function loadMessages() {
       friendUid
     );
 
+
   const messagesRef =
     collection(
       db,
@@ -180,11 +221,16 @@ function loadMessages() {
       "messages"
     );
 
+
   const messagesQuery =
     query(
       messagesRef,
-      orderBy("time", "asc")
+      orderBy(
+        "time",
+        "asc"
+      )
     );
+
 
   onSnapshot(
 
@@ -192,83 +238,24 @@ function loadMessages() {
 
     (snapshot) => {
 
-      messagesDiv.innerHTML = "";
-
-      snapshot.forEach((messageDoc) => {
-
-        const data =
-          messageDoc.data();
-
-        const isMine =
-          data.sender ===
-          currentUser.uid;
-
-        const box =
-          document.createElement("div");
-
-        box.style.cssText = `
-          margin:8px 0;
-          padding:10px;
-          border-radius:15px;
-          max-width:75%;
-          margin-left:${isMine ? "auto" : "0"};
-          background:${isMine ? "#dcf8c6" : "#ffffff"};
-          box-shadow:0 1px 3px rgba(0,0,0,.15);
-          word-break:break-word;
-        `;
+      messagesDiv.innerHTML =
+        "";
 
 
-        // =========================
-        // PHOTO MESSAGE
-        // =========================
+      snapshot.forEach(
+        (messageDoc) => {
 
-        if (data.image) {
+          const data =
+            messageDoc.data();
 
-          const img =
-            document.createElement("img");
 
-          img.src =
-            data.image;
-
-          img.alt =
-            "Photo";
-
-          img.style.cssText = `
-            width:100%;
-            max-width:280px;
-            border-radius:12px;
-            display:block;
-            object-fit:cover;
-          `;
-
-          box.appendChild(img);
+          showMessage(
+            data,
+            messageDoc.id
+          );
 
         }
-
-
-        // =========================
-        // TEXT MESSAGE
-        // =========================
-
-        if (data.text) {
-
-          const text =
-            document.createElement("div");
-
-          text.textContent =
-            data.text;
-
-          text.style.cssText = `
-            margin-top:${data.image ? "8px" : "0"};
-          `;
-
-          box.appendChild(text);
-
-        }
-
-        messagesDiv.appendChild(box);
-
-      });
+      );
 
 
       messagesDiv.scrollTop =
@@ -284,19 +271,189 @@ function loadMessages() {
         error
       );
 
+
       messagesDiv.innerHTML = `
-        <p style="
-          color:red;
-          padding:10px;
-        ">
+
+        <p
+          style="
+            color:red;
+            padding:10px;
+          "
+        >
+
           ❌ Chat load नहीं हुई।
+
           <br><br>
+
           ${error.message}
+
         </p>
+
       `;
 
     }
 
+  );
+
+}
+
+
+// =========================
+// SHOW MESSAGE
+// =========================
+
+function showMessage(
+  data,
+  messageId
+) {
+
+  const box =
+    document.createElement("div");
+
+
+  const isMine =
+    data.sender ===
+    currentUser.uid;
+
+
+  box.dataset.messageId =
+    messageId;
+
+
+  box.style.cssText = `
+
+    margin:8px 0;
+
+    padding:10px;
+
+    border-radius:15px;
+
+    max-width:75%;
+
+    margin-left:
+      ${isMine ? "auto" : "0"};
+
+    background:
+      ${isMine
+        ? "#dcf8c6"
+        : "#ffffff"};
+
+    box-shadow:
+      0 1px 3px
+      rgba(0,0,0,.15);
+
+    word-break:break-word;
+
+  `;
+
+
+  // =========================
+  // PHOTO
+  // =========================
+
+  if (data.image) {
+
+    const img =
+      document.createElement("img");
+
+
+    img.src =
+      data.image;
+
+
+    img.alt =
+      "Photo";
+
+
+    img.style.cssText = `
+
+      width:100%;
+
+      max-width:280px;
+
+      border-radius:12px;
+
+      display:block;
+
+      object-fit:cover;
+
+    `;
+
+
+    box.appendChild(
+      img
+    );
+
+  }
+
+
+  // =========================
+  // TEXT
+  // =========================
+
+  if (data.text) {
+
+    const text =
+      document.createElement("div");
+
+
+    text.textContent =
+      data.text;
+
+
+    text.style.cssText = `
+
+      margin-top:
+        ${data.image
+          ? "8px"
+          : "0"};
+
+    `;
+
+
+    box.appendChild(
+      text
+    );
+
+  }
+
+
+  // =========================
+  // TICK
+  // =========================
+
+  if (isMine) {
+
+    const tick =
+      document.createElement("span");
+
+
+    tick.textContent =
+      " ✓✓";
+
+
+    tick.style.cssText = `
+
+      float:right;
+
+      font-size:11px;
+
+      color:#777;
+
+      margin-top:5px;
+
+    `;
+
+
+    box.appendChild(
+      tick
+    );
+
+  }
+
+
+  messagesDiv.appendChild(
+    box
   );
 
 }
@@ -317,7 +474,7 @@ if (sendBtn) {
 
 
 // =========================
-// ENTER TO SEND
+// ENTER SEND
 // =========================
 
 if (messageInput) {
@@ -326,7 +483,10 @@ if (messageInput) {
     "keydown",
     (event) => {
 
-      if (event.key === "Enter") {
+      if (
+        event.key ===
+        "Enter"
+      ) {
 
         event.preventDefault();
 
@@ -341,7 +501,7 @@ if (messageInput) {
 
 
 // =========================
-// SEND TEXT MESSAGE
+// SEND MESSAGE
 // =========================
 
 async function sendMessage() {
@@ -349,37 +509,90 @@ async function sendMessage() {
   const text =
     messageInput.value.trim();
 
+
   if (!text) {
-
-    alert("Message लिखो");
-
     return;
-
   }
+
 
   if (!currentUser) {
 
-    alert("Please login first");
+    alert(
+      "Please login first"
+    );
 
     return;
 
   }
+
 
   if (!friendUid) {
 
-    alert("Friend select नहीं है");
+    alert(
+      "Friend select नहीं है"
+    );
 
     return;
 
   }
+
+
+  // =========================
+  // SHOW IMMEDIATELY
+  // =========================
+
+  const tempBox =
+    document.createElement("div");
+
+
+  tempBox.style.cssText = `
+
+    margin:8px 0;
+
+    padding:10px;
+
+    border-radius:15px;
+
+    max-width:75%;
+
+    margin-left:auto;
+
+    background:#dcf8c6;
+
+    box-shadow:
+      0 1px 3px
+      rgba(0,0,0,.15);
+
+    word-break:break-word;
+
+  `;
+
+
+  tempBox.textContent =
+    text + " ✓";
+
+
+  messagesDiv.appendChild(
+    tempBox
+  );
+
+
+  messagesDiv.scrollTop =
+    messagesDiv.scrollHeight;
+
+
+  // Input तुरंत खाली
+  messageInput.value =
+    "";
+
+
+  messageInput.focus();
 
 
   try {
 
-    sendBtn.disabled = true;
-
-    sendBtn.textContent =
-      "Sending...";
+    sendBtn.disabled =
+      true;
 
 
     const chatId =
@@ -399,7 +612,9 @@ async function sendMessage() {
       ),
 
       {
-        text: text,
+
+        text:
+          text,
 
         sender:
           currentUser.uid,
@@ -409,17 +624,18 @@ async function sendMessage() {
 
         time:
           serverTimestamp()
+
       }
 
     );
 
 
-    messageInput.value = "";
+    // Temporary message हटाओ
+    tempBox.remove();
 
-    messageInput.focus();
 
     console.log(
-      "Message sent successfully"
+      "Message saved ✅"
     );
 
 
@@ -430,20 +646,25 @@ async function sendMessage() {
       error
     );
 
+
+    tempBox.textContent =
+      text + " ❌";
+
+
+    tempBox.style.background =
+      "#ffd6d6";
+
+
     alert(
-      "Message send नहीं हुआ:\n\n" +
+      "Message save नहीं हुआ:\n\n" +
       error.message
     );
 
-
-  } finally {
-
-    sendBtn.disabled = false;
-
-    sendBtn.textContent =
-      "Send";
-
   }
+
+
+  sendBtn.disabled =
+    false;
 
 }
 
@@ -461,6 +682,7 @@ if (chatPhoto) {
       const file =
         chatPhoto.files[0];
 
+
       if (!file) {
         return;
       }
@@ -477,7 +699,7 @@ if (chatPhoto) {
       }
 
 
-      // 10 MB limit
+      // 10 MB
       if (
         file.size >
         10 * 1024 * 1024
@@ -487,7 +709,10 @@ if (chatPhoto) {
           "Photo 10 MB से छोटी होनी चाहिए।"
         );
 
-        chatPhoto.value = "";
+
+        chatPhoto.value =
+          "";
+
 
         return;
 
@@ -527,8 +752,13 @@ if (chatPhoto) {
             "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
 
             {
-              method: "POST",
-              body: formData
+
+              method:
+                "POST",
+
+              body:
+                formData
+
             }
 
           );
@@ -544,18 +774,22 @@ if (chatPhoto) {
         );
 
 
-        if (!result.secure_url) {
+        if (
+          !result.secure_url
+        ) {
 
           throw new Error(
+
             result.error?.message ||
             "Photo upload failed"
+
           );
 
         }
 
 
         // =========================
-        // FIRESTORE
+        // SAVE PHOTO MESSAGE
         // =========================
 
         const chatId =
@@ -575,6 +809,7 @@ if (chatPhoto) {
           ),
 
           {
+
             image:
               result.secure_url,
 
@@ -586,12 +821,14 @@ if (chatPhoto) {
 
             time:
               serverTimestamp()
+
           }
 
         );
 
 
-        chatPhoto.value = "";
+        chatPhoto.value =
+          "";
 
 
         alert(
