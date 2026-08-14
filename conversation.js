@@ -329,56 +329,71 @@ messageInput.addEventListener(
 
 async function sendMessage() {
 
-  const text =
-    messageInput.value.trim();
-
+  const text = messageInput.value.trim();
 
   if (!text) {
+    alert("Message लिखो");
     return;
   }
-
 
   if (!currentUser) {
-
     alert("Please login first");
-
     return;
-
   }
 
+  if (!friendUid) {
+    alert("Friend select नहीं है");
+    return;
+  }
 
   try {
 
-    const chatId =
-      getChatId(
-        currentUser.uid,
-        friendUid
-      );
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending...";
 
+    const chatId = getChatId(
+      currentUser.uid,
+      friendUid
+    );
 
     await addDoc(
-
       collection(
         db,
         "chats",
         chatId,
         "messages"
       ),
-
       {
         text: text,
-
-        sender:
-          currentUser.uid,
-
-        receiver:
-          friendUid,
-
-        time:
-          serverTimestamp()
+        sender: currentUser.uid,
+        receiver: friendUid,
+        time: serverTimestamp()
       }
-
     );
+
+    messageInput.value = "";
+
+    messageInput.focus();
+
+    console.log("Message sent successfully");
+
+  } catch (error) {
+
+    console.error("MESSAGE ERROR:", error);
+
+    alert(
+      "Message send नहीं हुआ:\n\n" +
+      error.message
+    );
+
+  } finally {
+
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Send";
+
+  }
+
+}
 
 
     messageInput.value = "";
