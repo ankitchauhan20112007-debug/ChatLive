@@ -6,18 +6,19 @@ import {
 
 import {
   doc,
-collection,
-addDoc,
-query,
-orderBy,
-onSnapshot,
-serverTimestamp
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
 // =========================
 // ELEMENTS
 // =========================
+
 const friendStatus =
   document.getElementById("friendStatus");
 
@@ -47,7 +48,6 @@ const friendUid =
 const savedFriendName =
   localStorage.getItem("chatFriendName");
 
-
 let currentUser = null;
 
 
@@ -57,10 +57,12 @@ if (!friendUid) {
 }
 
 
-// Friend nameif (friendName) {
+// Friend name
+if (friendName) {
   friendName.textContent =
     savedFriendName || "Friend";
 }
+
 
 // =========================
 // LOGIN
@@ -73,10 +75,32 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
- currentUser = user;
+  currentUser = user;
 
-loadFriendStatus();
-async function loadFriendStatus() {
+  loadFriendStatus();
+  loadMessages();
+
+});
+
+
+// =========================
+// CHAT ID
+// =========================
+
+function getChatId(uid1, uid2) {
+
+  return [uid1, uid2]
+    .sort()
+    .join("_");
+
+}
+
+
+// =========================
+// FRIEND STATUS
+// =========================
+
+function loadFriendStatus() {
 
   if (!friendStatus) return;
 
@@ -89,10 +113,13 @@ async function loadFriendStatus() {
 
   onSnapshot(
     friendRef,
+
     (snapshot) => {
 
       if (!snapshot.exists()) {
+
         friendStatus.innerHTML = "";
+
         return;
       }
 
@@ -117,6 +144,7 @@ async function loadFriendStatus() {
       `;
 
     },
+
     (error) => {
 
       console.error(
@@ -128,23 +156,6 @@ async function loadFriendStatus() {
 
     }
   );
-
-}
-
-loadMessages();
-
-});
-
-
-// =========================
-// CHAT ID
-// =========================
-
-function getChatId(uid1, uid2) {
-
-  return [uid1, uid2]
-    .sort()
-    .join("_");
 
 }
 
@@ -161,7 +172,6 @@ function loadMessages() {
       friendUid
     );
 
-
   const messagesRef =
     collection(
       db,
@@ -170,36 +180,31 @@ function loadMessages() {
       "messages"
     );
 
-
   const messagesQuery =
     query(
       messagesRef,
       orderBy("time", "asc")
     );
 
-
   onSnapshot(
+
     messagesQuery,
 
     (snapshot) => {
 
       messagesDiv.innerHTML = "";
 
-
       snapshot.forEach((messageDoc) => {
 
         const data =
           messageDoc.data();
 
-
         const isMine =
           data.sender ===
           currentUser.uid;
 
-
         const box =
           document.createElement("div");
-
 
         box.style.cssText = `
           margin:8px 0;
@@ -209,11 +214,12 @@ function loadMessages() {
           margin-left:${isMine ? "auto" : "0"};
           background:${isMine ? "#dcf8c6" : "#ffffff"};
           box-shadow:0 1px 3px rgba(0,0,0,.15);
+          word-break:break-word;
         `;
 
 
         // =========================
-        // PHOTO
+        // PHOTO MESSAGE
         // =========================
 
         if (data.image) {
@@ -221,14 +227,11 @@ function loadMessages() {
           const img =
             document.createElement("img");
 
-
           img.src =
             data.image;
 
-
           img.alt =
             "Photo";
-
 
           img.style.cssText = `
             width:100%;
@@ -238,14 +241,13 @@ function loadMessages() {
             object-fit:cover;
           `;
 
-
           box.appendChild(img);
 
         }
 
 
         // =========================
-        // TEXT
+        // TEXT MESSAGE
         // =========================
 
         if (data.text) {
@@ -253,21 +255,16 @@ function loadMessages() {
           const text =
             document.createElement("div");
 
-
           text.textContent =
             data.text;
 
-
           text.style.cssText = `
             margin-top:${data.image ? "8px" : "0"};
-            word-break:break-word;
           `;
-
 
           box.appendChild(text);
 
         }
-
 
         messagesDiv.appendChild(box);
 
@@ -287,10 +284,12 @@ function loadMessages() {
         error
       );
 
-
       messagesDiv.innerHTML = `
-        <p style="color:red;">
-          Chat load नहीं हुई।
+        <p style="
+          color:red;
+          padding:10px;
+        ">
+          ❌ Chat load नहीं हुई।
           <br><br>
           ${error.message}
         </p>
@@ -304,115 +303,145 @@ function loadMessages() {
 
 
 // =========================
-// SEND TEXT
+// SEND BUTTON
 // =========================
 
-sendBtn.addEventListener(
-  "click",
-  sendMessage
-);
+if (sendBtn) {
+
+  sendBtn.addEventListener(
+    "click",
+    sendMessage
+  );
+
+}
 
 
-messageInput.addEventListener(
-  "keydown",
-  (event) => {
+// =========================
+// ENTER TO SEND
+// =========================
 
-    if (event.key === "Enter") {
+if (messageInput) {
 
-      sendMessage();
+  messageInput.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        sendMessage();
+
+      }
 
     }
+  );
 
-  }
-);
+}
 
+
+// =========================
+// SEND TEXT MESSAGE
+// =========================
 
 async function sendMessage() {
 
-  const text = messageInput.value.trim();
+  const text =
+    messageInput.value.trim();
 
   if (!text) {
+
     alert("Message लिखो");
+
     return;
+
   }
 
   if (!currentUser) {
+
     alert("Please login first");
+
     return;
+
   }
 
   if (!friendUid) {
+
     alert("Friend select नहीं है");
+
     return;
+
   }
+
 
   try {
 
     sendBtn.disabled = true;
-    sendBtn.textContent = "Sending...";
 
-    const chatId = getChatId(
-      currentUser.uid,
-      friendUid
-    );
+    sendBtn.textContent =
+      "Sending...";
+
+
+    const chatId =
+      getChatId(
+        currentUser.uid,
+        friendUid
+      );
+
 
     await addDoc(
+
       collection(
         db,
         "chats",
         chatId,
         "messages"
       ),
+
       {
         text: text,
-        sender: currentUser.uid,
-        receiver: friendUid,
-        time: serverTimestamp()
+
+        sender:
+          currentUser.uid,
+
+        receiver:
+          friendUid,
+
+        time:
+          serverTimestamp()
       }
+
     );
+
 
     messageInput.value = "";
 
     messageInput.focus();
 
-    console.log("Message sent successfully");
+    console.log(
+      "Message sent successfully"
+    );
+
 
   } catch (error) {
 
-    console.error("MESSAGE ERROR:", error);
+    console.error(
+      "MESSAGE ERROR:",
+      error
+    );
 
     alert(
       "Message send नहीं हुआ:\n\n" +
       error.message
     );
 
+
   } finally {
 
     sendBtn.disabled = false;
-    sendBtn.textContent = "Send";
 
-  }
-
-}
-
-
-    messageInput.value = "";
-
-    messageInput.focus();
-
-
-  } catch (error) {
-
-    console.error(
-      "Message error:",
-      error
-    );
-
-
-    alert(
-      "Message send नहीं हुआ:\n" +
-      error.message
-    );
+    sendBtn.textContent =
+      "Send";
 
   }
 
@@ -432,7 +461,6 @@ if (chatPhoto) {
       const file =
         chatPhoto.files[0];
 
-
       if (!file) {
         return;
       }
@@ -440,7 +468,9 @@ if (chatPhoto) {
 
       if (!currentUser) {
 
-        alert("Please login first");
+        alert(
+          "Please login first"
+        );
 
         return;
 
@@ -493,11 +523,14 @@ if (chatPhoto) {
 
         const response =
           await fetch(
+
             "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+
             {
               method: "POST",
               body: formData
             }
+
           );
 
 
@@ -512,8 +545,6 @@ if (chatPhoto) {
 
 
         if (!result.secure_url) {
-
-          console.error(result);
 
           throw new Error(
             result.error?.message ||
@@ -577,10 +608,9 @@ if (chatPhoto) {
 
 
         alert(
-          "Photo send नहीं हुई:\n" +
+          "Photo send नहीं हुई:\n\n" +
           error.message
         );
-
 
       }
 
