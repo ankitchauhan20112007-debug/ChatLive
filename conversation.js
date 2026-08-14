@@ -568,151 +568,174 @@ async function sendMessage() {
 
 }
 
-
-// ===============================
+// =========================
 // SEND PHOTO
-// ===============================
+// =========================
 
-chatPhoto.addEventListener(
-  "change",
-  sendPhoto
-);
+if (chatPhoto) {
 
+  chatPhoto.addEventListener(
+    "change",
+    async () => {
 
-async function sendPhoto() {
+      const file = chatPhoto.files[0];
 
-  const file =
-    chatPhoto.files[0];
+      if (!file) {
+        return;
+      }
 
+      if (!currentUser) {
+        alert("Please login first");
+        chatPhoto.value = "";
+        return;
+      }
 
-  if (!file) {
-    return;
-  }
+      // 10 MB limit
+      if (file.size > 10 * 1024 * 1024) {
 
+        alert("Photo 10 MB से छोटी होनी चाहिए।");
 
-  if (!currentUser) {
+        chatPhoto.value = "";
 
-    alert("Please login first");
-    return;
+        return;
+      }
 
-  }
+      try {
 
+        // =========================
+        // SEND BUTTON LOADING
+        // =========================
 
-  if (
-    file.size >
-    10 * 1024 * 1024
-  ) {
+        if (sendBtn) {
 
-    alert(
-      "Photo 10 MB से छोटी होनी चाहिए।"
-    );
+          sendBtn.disabled = true;
 
-    chatPhoto.value = "";
+          sendBtn.textContent = "⏳";
 
-    return;
-
-  }
-
-
-  try {
-
-    alert("Photo uploading...");
-
-
-    const formData =
-      new FormData();
-
-
-    formData.append(
-      "file",
-      file
-    );
-
-
-    formData.append(
-      "upload_preset",
-      "swlqxqgn"
-    );
-
-
-    const response =
-      await fetch(
-        "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
-        {
-          method: "POST",
-          body: formData
         }
-      );
 
 
-    const result =
-      await response.json();
+        // =========================
+        // CLOUDINARY
+        // =========================
+
+        const formData = new FormData();
+
+        formData.append(
+          "file",
+          file
+        );
+
+        formData.append(
+          "upload_preset",
+          "swlqxqgn"
+        );
 
 
-    if (!result.secure_url) {
-
-      throw new Error(
-        result.error?.message ||
-        "Photo upload failed"
-      );
-
-    }
-
-
-    const chatId =
-      getChatId(
-        currentUser.uid,
-        friendUid
-      );
+        const response = await fetch(
+          "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
+          {
+            method: "POST",
+            body: formData
+          }
+        );
 
 
-    await addDoc(
+        const result =
+          await response.json();
 
-      collection(
-        db,
-        "chats",
-        chatId,
-        "messages"
-      ),
 
-      {
+        console.log(
+          "Cloudinary:",
+          result
+        );
 
-        image:
-          result.secure_url,
 
-        sender:
-          currentUser.uid,
+        if (!result.secure_url) {
 
-        receiver:
-          friendUid,
+          throw new Error(
+            result.error?.message ||
+            "Photo upload failed"
+          );
 
-        time:
-          serverTimestamp()
+        }
+
+
+        // =========================
+        // FIRESTORE
+        // =========================
+
+        const chatId =
+          getChatId(
+            currentUser.uid,
+            friendUid
+          );
+
+
+        await addDoc(
+
+          collection(
+            db,
+            "chats",
+            chatId,
+            "messages"
+          ),
+
+          {
+            image:
+              result.secure_url,
+
+            sender:
+              currentUser.uid,
+
+            receiver:
+              friendUid,
+
+            time:
+              serverTimestamp()
+          }
+
+        );
+
+
+        // Clear selected photo
+        chatPhoto.value = "";
+
+
+        console.log(
+          "Photo sent successfully ✅"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "PHOTO ERROR:",
+          error
+        );
+
+        alert(
+          "Photo send नहीं हुई:\n\n" +
+          error.message
+        );
+
+      } finally {
+
+        // =========================
+        // RESTORE SEND ARROW
+        // =========================
+
+        if (sendBtn) {
+
+          sendBtn.disabled = false;
+
+          sendBtn.textContent = "➤";
+
+        }
 
       }
 
-    );
-
-
-    chatPhoto.value = "";
-
-
-    alert("Photo sent ✅");
-
-
-  } catch (error) {
-
-    console.error(
-      "PHOTO ERROR:",
-      error
-    );
-
-
-    alert(
-      "Photo send नहीं हुई:\n\n" +
-      error.message
-    );
-
-  }
+    }
+  );
 
 }
