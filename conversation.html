@@ -3,290 +3,153 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
 
-  <title>ChatLive Chat</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ChatLive</title>
 
   <link rel="stylesheet" href="style.css">
 
   <style>
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      background: #f5f5f5;
       font-family: Arial, sans-serif;
+      background: #efeae2;
     }
 
     .chat-page {
       height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-bottom: 65px;
     }
 
-    /* HEADER */
+    /* ================= HEADER ================= */
+
     .chat-header {
+      height: 65px;
       background: #075E54;
       color: white;
-      padding: 12px 15px;
+
       display: flex;
       align-items: center;
-      gap: 12px;
+
+      padding: 7px 10px;
+      gap: 9px;
+
       flex-shrink: 0;
     }
 
     .back-btn {
-      font-size: 32px;
       color: white;
       text-decoration: none;
-      line-height: 1;
+      font-size: 30px;
+      padding: 3px;
     }
 
     #friendPhoto {
-      width: 55px;
-      height: 55px;
+      width: 45px;
+      height: 45px;
+
       border-radius: 50%;
       object-fit: cover;
+
       background: #ddd;
     }
 
     .friend-info {
       flex: 1;
+      min-width: 0;
     }
 
     #friendName {
-      font-size: 25px;
+      font-size: 18px;
       font-weight: bold;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     #friendStatus {
-      font-size: 14px;
-      margin-top: 3px;
+      font-size: 12px;
+      margin-top: 2px;
     }
 
-    /* MESSAGES */
+    .header-icons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      font-size: 21px;
+    }
+
+    /* ================= CHAT ================= */
+
     #messages {
       flex: 1;
+
       overflow-y: auto;
-      padding: 12px 10px;
+
+      padding: 10px;
+
+      background:
+        #efeae2;
+
       display: flex;
       flex-direction: column;
-      background: #f5f5f5;
     }
 
     .message-box {
       max-width: 78%;
-      padding: 10px 13px;
-      margin: 5px 0;
-      border-radius: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+
+      padding: 7px 9px;
+
+      margin: 3px 0;
+
+      border-radius: 10px;
+
+      font-size: 16px;
+
       word-break: break-word;
-      font-size: 17px;
+
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.15);
     }
 
     .my-message {
       align-self: flex-end;
-      background: #dcf8c6;
-      border-bottom-right-radius: 4px;
+
+      background: #d9fdd3;
+
+      border-bottom-right-radius: 3px;
     }
 
     .friend-message {
       align-self: flex-start;
+
       background: white;
-      border-bottom-left-radius: 4px;
+
+      border-bottom-left-radius: 3px;
     }
 
     .message-image {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 12px;
       display: block;
+
+      width: 100%;
+      max-width: 280px;
+
+      border-radius: 8px;
     }
 
-    .ticks {
-      font-size: 12px;
-      color: #777;
-      margin-left: 5px;
-    }
+    .message-time {
+      font-size: 10px;
 
-    /* COMPOSER */
-    .composer {
-      position: fixed;
-      bottom: 65px;
-      left: 0;
-      right: 0;
-      background: white;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-top: 1px solid #ddd;
-      z-index: 1000;
-    }
-
-    .camera-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #075E54;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 23px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    #message {
-      flex: 1;
-      height: 48px;
-      border: 1px solid #ddd;
-      border-radius: 25px;
-      padding: 0 16px;
-      font-size: 17px;
-      outline: none;
-      background: white;
-    }
-
-    #message:focus {
-      border-color: #075E54;
-    }
-
-    #sendBtn {
-      height: 48px;
-      min-width: 80px;
-      border: none;
-      border-radius: 25px;
-      background: #128CDB;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-    }
-
-    #sendBtn:disabled {
-      opacity: .6;
-    }
-
-    /* NAVBAR */
-    .navbar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 65px;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid #ddd;
-      z-index: 1100;
-    }
-
-    .navbar a {
-      text-decoration: none;
-      font-size: 28px;
-    }
-  </style>
-
-</head>
-
-<body>
-
-<div class="chat-page">
-
-  <!-- HEADER -->
-
-  <div class="chat-header">
-
-    <a href="chat.html" class="back-btn">←</a>
-
-    <img
-      id="friendPhoto"
-      src="https://via.placeholder.com/100"
-      alt="Profile"
-    >
-
-    <div class="friend-info">
-
-      <div id="friendName">
-        Loading...
-      </div>
-
-      <div id="friendStatus">
-        Checking...
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- MESSAGES -->
-
-  <div id="messages"></div>
-
-
-  <!-- MESSAGE BOX -->
-
-  <div class="composer">
-
-    <label
-      for="chatPhoto"
-      class="camera-btn"
-    >
-      📷
-    </label>
-
-    <input
-      type="file"
-      id="chatPhoto"
-      accept="image/*"
-      style="display:none;"
-    >
-
-    <input
-      type="text"
-      id="message"
-      placeholder="Type a message..."
-      autocomplete="off"
-    >
-
-    <button
-      id="sendBtn"
-      type="button"
-    >
-      Send
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- NAVBAR -->
-
-<div class="navbar">
-
-  <a href="home.html">🏠</a>
-
-  <a href="post.html">📸</a>
-
-  <a href="chat.html">💬</a>
-
-  <a href="profile.html">👤</a>
-
-</div>
-
-
-<script
-  type="module"
-  src="./conversation.js">
-</script>
-
-</body>
-</html>
+      color: #667
