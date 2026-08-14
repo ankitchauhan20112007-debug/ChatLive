@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,76 +8,151 @@
   <title>ChatLive Chat</title>
 
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      margin: 0;
+      padding-bottom: 145px;
+      background: #f5f5f5;
+    }
+
+    .chat-header {
+      background: #075E54;
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    #friendName {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #friendStatus {
+      margin-top: 5px;
+      height: 12px;
+    }
+
+    #messages {
+      height: calc(100vh - 300px);
+      min-height: 250px;
+      overflow-y: auto;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* SEND BAR */
+    .send-area {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 70px;
+      background: white;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      box-shadow: 0 -2px 8px rgba(0,0,0,.15);
+      z-index: 1000;
+    }
+
+    .photo-label {
+      width: 45px;
+      height: 45px;
+      flex-shrink: 0;
+      background: #075E54;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #message {
+      flex: 1;
+      min-width: 0;
+      height: 45px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 22px;
+      padding: 0 15px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #sendBtn {
+      height: 45px;
+      padding: 0 20px;
+      border: none;
+      border-radius: 22px;
+      background: #1296e8;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #sendBtn:disabled {
+      opacity: .6;
+    }
+  </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-  <div style="
-  background:#075E54;
-  color:white;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
-">
-  <div id="friendName" style="font-size:20px;font-weight:bold;">
-    Loading...
+  <!-- HEADER -->
+  <div class="chat-header">
+
+    <div id="friendName">
+      Loading...
+    </div>
+
+    <div id="friendStatus">
+      Checking status...
+    </div>
+
   </div>
 
-  <div
-  id="friendStatus"
-  style="
-    height:8px;
-    margin-top:5px;
-  "
-></div>
+
+  <!-- MESSAGES -->
+  <div id="messages"></div>
+
 </div>
 
-  <div id="messages"
-    style="
-      height:400px;
-      overflow-y:auto;
-      background:#f5f5f5;
-      padding:10px;
-      border-radius:10px;
-      margin-bottom:10px;
-    ">
-  </div>
 
-  <div style="display:flex;gap:8px;align-items:center;">
+<!-- SEND AREA -->
+<div class="send-area">
 
   <label
-  for="chatPhoto"
-  style="
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:45px;
-    height:45px;
-    background:#075E54;
-    color:white;
-    border-radius:50%;
-    font-size:22px;
-    cursor:pointer;
-  "
->
-  📷
-</label>
+    for="chatPhoto"
+    class="photo-label"
+  >
+    📷
+  </label>
 
-<input
-  type="file"
-  id="chatPhoto"
-  accept="image/*"
-  style="display:none;"
->
+  <input
+    type="file"
+    id="chatPhoto"
+    accept="image/*"
+    style="display:none;"
+  >
+
 
   <input
     type="text"
     id="message"
     placeholder="Type a message..."
-    style="flex:1;"
+    autocomplete="off"
   >
+
 
   <button
     id="sendBtn"
@@ -87,16 +163,26 @@
 
 </div>
 
-</div>
 
+<!-- NAVBAR -->
 <div class="navbar">
+
   <a href="home.html">🏠</a>
+
   <a href="post.html">📸</a>
+
   <a href="chat.html">💬</a>
+
   <a href="profile.html">👤</a>
+
 </div>
 
-<script type="module" src="./conversation.js"></script>
+
+<script
+  type="module"
+  src="./conversation.js"
+></script>
 
 </body>
+
 </html>
