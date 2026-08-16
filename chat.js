@@ -8,28 +8,12 @@ import {
   collection,
   onSnapshot,
   query,
-  orderBy
+  where
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
 const friendsDiv =
   document.getElementById("friends");
-
-
-let currentUser = null;
-
-
-// =========================
-// CHAT ID
-// =========================
-
-function getChatId(uid1, uid2) {
-
-  return [uid1, uid2]
-    .sort()
-    .join("_");
-
-}
 
 
 // =========================
@@ -51,12 +35,9 @@ onAuthStateChanged(auth, (user) => {
     `;
 
     return;
-
   }
 
-  currentUser = user;
-
-  loadFriends();
+  loadFriends(user);
 
 });
 
@@ -65,7 +46,7 @@ onAuthStateChanged(auth, (user) => {
 // LOAD FRIENDS
 // =========================
 
-function loadFriends() {
+function loadFriends(currentUser) {
 
   onSnapshot(
     collection(db, "users"),
@@ -85,7 +66,8 @@ function loadFriends() {
 
         // अपना account hide
         if (
-          userDoc.id === currentUser.uid
+          userDoc.id ===
+          currentUser.uid
         ) {
           return;
         }
@@ -94,490 +76,172 @@ function loadFriends() {
         count++;
 
 
-        createFriendCard(
-          userDoc.id,
-          data
-        );
-
-      });
+        const friendUid =
+          userDoc.id;
 
 
-      if (count === 0) {
+        const name =
+          data.name ||
+          data.username ||
+          data.displayName ||
+          "User";
 
-        friendsDiv.innerHTML = `
-          <p style="
-            text-align:center;
-            color:#777;
-            margin-top:30px;
-          ">
-            कोई friend नहीं मिला।
-          </p>
+
+        // =========================
+        // CARD
+        // =========================
+
+        const card =
+          document.createElement("div");
+
+
+        card.style.cssText = `
+          background:white;
+          margin:12px 0;
+          padding:14px;
+          border-radius:18px;
+          display:flex;
+          align-items:center;
+          gap:12px;
+          box-shadow:0 2px 8px rgba(0,0,0,.12);
+          cursor:pointer;
+          position:relative;
         `;
 
-      }
 
-    },
+        // =========================
+        // PHOTO
+        // =========================
 
-    (error) => {
+        const photo =
+          data.photo || "";
 
-      console.error(
-        "Users error:",
-        error
-      );
 
-      friendsDiv.innerHTML = `
-        <div style="
-          background:#ffe5e5;
-          color:#b00000;
-          padding:15px;
-          border-radius:12px;
-          margin-top:20px;
-        ">
-          ❌ Friends load नहीं हुए।
-          <br><br>
-          ${error.message}
-        </div>
-      `;
+        let avatar;
 
-    }
 
-  );
+        if (photo) {
 
-}
+          avatar =
+            document.createElement("img");
 
 
-// =========================
-// FRIEND CARD
-// =========================
+          avatar.src =
+            photo;
 
-function createFriendCard(
-  friendUid,
-  data
-) {
 
-  const card =
-    document.createElement("div");
+          avatar.style.cssText = `
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            object-fit:cover;
+            flex-shrink:0;
+            background:#ddd;
+          `;
 
 
-  card.style.cssText = `
-    background:white;
-    margin:10px 0;
-    padding:12px;
-    border-radius:18px;
+          avatar.onerror = () => {
 
-    display:flex;
-    align-items:center;
+            avatar.src =
+              "https://via.placeholder.com/60";
 
-    gap:12px;
+          };
 
-    box-shadow:
-      0 2px 8px rgba(0,0,0,.12);
+        } else {
 
-    cursor:pointer;
-  `;
+          avatar =
+            document.createElement("div");
 
 
-  // =========================
-  // PHOTO
-  // =========================
+          avatar.textContent =
+            "👤";
 
-  const photo =
-    data.photo || "";
 
-
-  let avatar;
-
-
-  if (photo) {
-
-    avatar =
-      document.createElement("img");
-
-    avatar.src =
-      photo;
-
-    avatar.style.cssText = `
-      width:58px;
-      height:58px;
-
-      border-radius:50%;
-
-      object-fit:cover;
-
-      flex-shrink:0;
-
-      background:#ddd;
-    `;
-
-
-    avatar.onerror = () => {
-
-      avatar.src =
-        "https://via.placeholder.com/60";
-
-    };
-
-  } else {
-
-    avatar =
-      document.createElement("div");
-
-    avatar.textContent =
-      "👤";
-
-    avatar.style.cssText = `
-      width:58px;
-      height:58px;
-
-      border-radius:50%;
-
-      background:#ddd;
-
-      display:flex;
-
-      align-items:center;
-      justify-content:center;
-
-      font-size:27px;
-
-      flex-shrink:0;
-    `;
-
-  }
-
-
-  // =========================
-  // NAME
-  // =========================
-
-  const name =
-    data.name ||
-    data.username ||
-    data.displayName ||
-    "User";
-
-
-  // =========================
-  // INFO
-  // =========================
-
-  const info =
-    document.createElement("div");
-
-
-  info.style.cssText = `
-    flex:1;
-    min-width:0;
-  `;
-
-
-  const nameDiv =
-    document.createElement("div");
-
-
-  nameDiv.textContent =
-    name;
-
-
-  nameDiv.style.cssText = `
-    font-size:17px;
-    font-weight:bold;
-
-    color:#222;
-
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  `;
-
-
-  // =========================
-  // LAST MESSAGE
-  // =========================
-
-  const lastMessage =
-    document.createElement("div");
-
-
-  lastMessage.textContent =
-    "No messages yet";
-
-
-  lastMessage.style.cssText = `
-    font-size:14px;
-    color:#777;
-
-    margin-top:5px;
-
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  `;
-
-
-  info.appendChild(nameDiv);
-
-  info.appendChild(lastMessage);
-
-
-  // =========================
-  // RIGHT SIDE
-  // =========================
-
-  const right =
-    document.createElement("div");
-
-
-  right.style.cssText = `
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:flex-end;
-
-    gap:7px;
-
-    flex-shrink:0;
-  `;
-
-
-  // Online dot
-
-  const dot =
-    document.createElement("span");
-
-
-  dot.style.cssText = `
-    width:6px;
-    height:6px;
-
-    border-radius:50%;
-
-    background:${
-      data.online === true
-        ? "#00a000"
-        : "#d3d3d3"
-    };
-  `;
-
-
-  // =========================
-  // UNREAD COUNT
-  // =========================
-
-  const unread =
-    document.createElement("span");
-
-
-  unread.style.cssText = `
-    display:none;
-
-    min-width:20px;
-    height:20px;
-
-    padding:0 5px;
-
-    border-radius:50%;
-
-    background:#25D366;
-
-    color:white;
-
-    font-size:12px;
-    font-weight:bold;
-
-    align-items:center;
-    justify-content:center;
-  `;
-
-
-  right.appendChild(dot);
-
-  right.appendChild(unread);
-
-
-  card.appendChild(avatar);
-
-  card.appendChild(info);
-
-  card.appendChild(right);
-
-
-  // =========================
-  // LOAD CHAT PREVIEW
-  // =========================
-
-  loadChatPreview(
-    friendUid,
-    lastMessage,
-    unread
-  );
-
-
-  // =========================
-  // OPEN CHAT
-  // =========================
-
-  card.addEventListener(
-    "click",
-    () => {
-
-      localStorage.setItem(
-        "chatFriendUid",
-        friendUid
-      );
-
-
-      localStorage.setItem(
-        "chatFriendName",
-        name
-      );
-
-
-      window.location.href =
-        "conversation.html";
-
-    }
-  );
-
-
-  friendsDiv.appendChild(card);
-
-}
-
-
-// =========================
-// LOAD CHAT PREVIEW
-// =========================
-
-function loadChatPreview(
-  friendUid,
-  lastMessage,
-  unread
-) {
-
-  const chatId =
-    getChatId(
-      currentUser.uid,
-      friendUid
-    );
-
-
-  const messagesRef =
-    collection(
-      db,
-      "chats",
-      chatId,
-      "messages"
-    );
-
-
-  const messagesQuery =
-    query(
-      messagesRef,
-      orderBy("time", "desc")
-    );
-
-
-  onSnapshot(
-    messagesQuery,
-
-    (snapshot) => {
-
-      if (snapshot.empty) {
-
-        lastMessage.textContent =
-          "No messages yet";
-
-        unread.style.display =
-          "none";
-
-        return;
-
-      }
-
-
-      // =========================
-      // LAST MESSAGE
-      // =========================
-
-      const latest =
-        snapshot.docs[0].data();
-
-
-      if (latest.image) {
-
-        lastMessage.textContent =
-          "📷 Photo";
-
-      } else {
-
-        lastMessage.textContent =
-          latest.text ||
-          "Message";
-
-      }
-
-
-      // =========================
-      // UNREAD
-      // =========================
-
-      let unreadCount = 0;
-
-
-      snapshot.forEach(
-        (messageDoc) => {
-
-          const message =
-            messageDoc.data();
-
-
-          if (
-            message.sender !==
-              currentUser.uid &&
-            message.read !== true
-          ) {
-
-            unreadCount++;
-
-          }
+          avatar.style.cssText = `
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            background:#ddd;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            flex-shrink:0;
+          `;
 
         }
-      );
 
 
-      if (unreadCount > 0) {
+        // =========================
+        // INFO
+        // =========================
 
-        unread.textContent =
-          unreadCount > 99
-            ? "99+"
-            : unreadCount;
+        const info =
+          document.createElement("div");
 
-        unread.style.display =
-          "flex";
 
-      } else {
+        info.style.cssText = `
+          flex:1;
+          min-width:0;
+        `;
 
-        unread.style.display =
-          "none";
 
-      }
+        const nameDiv =
+          document.createElement("div");
 
-    },
 
-    (error) => {
+        nameDiv.textContent =
+          name;
 
-      console.error(
-        "Chat preview error:",
-        error
-      );
 
-      lastMessage.textContent =
-        "Unable to load";
+        nameDiv.style.cssText = `
+          font-size:18px;
+          font-weight:bold;
+          color:#222;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        `;
 
-    }
 
-  );
+        info.appendChild(
+          nameDiv
+        );
 
-}
+
+        // =========================
+        // ONLINE DOT
+        // =========================
+
+        const dot =
+          document.createElement("span");
+
+
+        dot.style.cssText = `
+          display:block;
+          width:6px;
+          height:6px;
+          border-radius:50%;
+          background:${
+            data.online === true
+              ? "#00a000"
+              : "#d3d3d3"
+          };
+          margin-top:7px;
+        `;
+
+
+        info.appendChild(
+          dot
+        );
+
+
+        // =========================
+        // CHAT ICON
+        // =========================
+
+        const chatIcon =
+          document.createElement("div");
+
+
+       
