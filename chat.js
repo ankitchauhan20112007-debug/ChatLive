@@ -244,4 +244,268 @@ function loadFriends(currentUser) {
           document.createElement("div");
 
 
-       
+        chatIcon.textContent =
+          "💬";
+
+
+        chatIcon.style.cssText = `
+          font-size:25px;
+          flex-shrink:0;
+        `;
+
+
+        card.appendChild(
+          avatar
+        );
+
+
+        card.appendChild(
+          info
+        );
+
+
+        card.appendChild(
+          chatIcon
+        );
+
+
+        // =========================
+        // UNREAD COUNT
+        // =========================
+
+        const unread =
+          document.createElement("span");
+
+
+        unread.style.cssText = `
+          position:absolute;
+          right:10px;
+          top:10px;
+
+          min-width:20px;
+          height:20px;
+
+          padding:0 6px;
+
+          border-radius:10px;
+
+          background:#25D366;
+          color:white;
+
+          display:none;
+
+          align-items:center;
+          justify-content:center;
+
+          font-size:11px;
+          font-weight:bold;
+        `;
+
+
+        card.appendChild(
+          unread
+        );
+
+
+        // =========================
+        // LOAD UNREAD
+        // =========================
+
+        loadUnreadCount(
+          currentUser.uid,
+          friendUid,
+          unread
+        );
+
+
+        // =========================
+        // OPEN CHAT
+        // =========================
+
+        card.addEventListener(
+          "click",
+          () => {
+
+            localStorage.setItem(
+              "chatFriendUid",
+              friendUid
+            );
+
+
+            localStorage.setItem(
+              "chatFriendName",
+              name
+            );
+
+
+            window.location.href =
+              "conversation.html";
+
+          }
+        );
+
+
+        friendsDiv.appendChild(
+          card
+        );
+
+      });
+
+
+      // =========================
+      // NO FRIEND
+      // =========================
+
+      if (count === 0) {
+
+        friendsDiv.innerHTML = `
+          <p style="
+            text-align:center;
+            color:#777;
+            margin-top:30px;
+          ">
+            कोई friend नहीं मिला।
+          </p>
+        `;
+
+      }
+
+    },
+
+
+    (error) => {
+
+      console.error(
+        "Firestore error:",
+        error
+      );
+
+
+      friendsDiv.innerHTML = `
+        <div style="
+          background:#ffe5e5;
+          color:#b00000;
+          padding:15px;
+          border-radius:12px;
+          margin-top:20px;
+        ">
+          ❌ Friends load नहीं हुए।
+          <br><br>
+          ${error.message}
+        </div>
+      `;
+
+    }
+
+  );
+
+}
+
+
+// =========================
+// UNREAD COUNT
+// =========================
+
+function loadUnreadCount(
+  myUid,
+  friendUid,
+  unreadElement
+) {
+
+  const chatId =
+    getChatId(
+      myUid,
+      friendUid
+    );
+
+
+  const messagesRef =
+    collection(
+      db,
+      "chats",
+      chatId,
+      "messages"
+    );
+
+
+  const unreadQuery =
+    query(
+      messagesRef,
+
+      where(
+        "receiver",
+        "==",
+        myUid
+      ),
+
+      where(
+        "read",
+        "==",
+        false
+      )
+    );
+
+
+  onSnapshot(
+    unreadQuery,
+
+    (snapshot) => {
+
+      const count =
+        snapshot.size;
+
+
+      if (count > 0) {
+
+        unreadElement.style.display =
+          "flex";
+
+
+        unreadElement.textContent =
+          count > 99
+            ? "99+"
+            : count;
+
+      } else {
+
+        unreadElement.style.display =
+          "none";
+
+      }
+
+    },
+
+    (error) => {
+
+      console.error(
+        "Unread count error:",
+        error
+      );
+
+      unreadElement.style.display =
+        "none";
+
+    }
+
+  );
+
+}
+
+
+// =========================
+// CHAT ID
+// =========================
+
+function getChatId(
+  uid1,
+  uid2
+) {
+
+  return [
+    uid1,
+    uid2
+  ]
+    .sort()
+    .join("_");
+
+}
