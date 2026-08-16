@@ -29,7 +29,7 @@ const friendName =
 const friendStatus =
   document.getElementById("friendStatus");
 
-const messagesDiv =
+const messages =
   document.getElementById("messages");
 
 const messageInput =
@@ -43,13 +43,13 @@ const chatPhoto =
 
 
 // =====================================
-// FRIEND DATA
+// FRIEND
 // =====================================
 
 const friendUid =
   localStorage.getItem("chatFriendUid");
 
-const savedFriendName =
+const savedName =
   localStorage.getItem("chatFriendName");
 
 
@@ -60,9 +60,7 @@ let currentUser = null;
 // CHECK FRIEND
 // =====================================
 
-if (!friendUid) {
-
-  alert("Friend select नहीं है");
+if (!friendUid){
 
   window.location.href =
     "chat.html";
@@ -74,11 +72,14 @@ if (!friendUid) {
 // CHAT ID
 // =====================================
 
-function getChatId(uid1, uid2) {
+function chatId(){
 
-  return [uid1, uid2]
-    .sort()
-    .join("_");
+  return [
+    currentUser.uid,
+    friendUid
+  ]
+  .sort()
+  .join("_");
 
 }
 
@@ -89,11 +90,9 @@ function getChatId(uid1, uid2) {
 
 onAuthStateChanged(
   auth,
-  async (user) => {
+  async (user)=>{
 
-    console.log("AUTH:", user);
-
-    if (!user) {
+    if(!user){
 
       window.location.href =
         "index.html";
@@ -102,23 +101,23 @@ onAuthStateChanged(
 
     }
 
-    currentUser = user;
+
+    currentUser =
+      user;
+
 
     console.log(
-      "Current UID:",
-      currentUser.uid
+      "LOGIN OK:",
+      user.uid
     );
 
 
-    // Friend information
     await loadFriend();
 
 
-    // Online status
-    loadFriendStatus();
+    loadStatus();
 
 
-    // Messages
     loadMessages();
 
   }
@@ -126,14 +125,14 @@ onAuthStateChanged(
 
 
 // =====================================
-// LOAD FRIEND
+// FRIEND INFO
 // =====================================
 
-async function loadFriend() {
+async function loadFriend(){
 
-  try {
+  try{
 
-    const friendRef =
+    const ref =
       doc(
         db,
         "users",
@@ -141,21 +140,14 @@ async function loadFriend() {
       );
 
 
-    const snapshot =
-      await getDoc(friendRef);
+    const snap =
+      await getDoc(ref);
 
 
-    if (!snapshot.exists()) {
+    if(!snap.exists()){
 
-      if (friendName) {
-        friendName.textContent =
-          savedFriendName || "User";
-      }
-
-      if (friendStatus) {
-        friendStatus.textContent =
-          "offline";
-      }
+      friendName.textContent =
+        savedName || "User";
 
       return;
 
@@ -163,31 +155,18 @@ async function loadFriend() {
 
 
     const data =
-      snapshot.data();
+      snap.data();
 
 
-    const name =
+    friendName.textContent =
       data.name ||
       data.username ||
       data.displayName ||
-      savedFriendName ||
+      savedName ||
       "User";
 
 
-    // NAME
-    if (friendName) {
-
-      friendName.textContent =
-        name;
-
-    }
-
-
-    // PHOTO
-    if (
-      friendPhoto &&
-      data.photo
-    ) {
+    if(data.photo){
 
       friendPhoto.src =
         data.photo;
@@ -195,20 +174,7 @@ async function loadFriend() {
     }
 
 
-    // PHOTO ERROR
-    if (friendPhoto) {
-
-      friendPhoto.onerror =
-        () => {
-
-          friendPhoto.src =
-            "https://via.placeholder.com/100";
-
-        };
-
-    }
-
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "FRIEND ERROR:",
@@ -216,13 +182,9 @@ async function loadFriend() {
     );
 
 
-    if (friendName) {
-
-      friendName.textContent =
-        savedFriendName ||
-        "User";
-
-    }
+    friendName.textContent =
+      savedName ||
+      "User";
 
   }
 
@@ -230,17 +192,12 @@ async function loadFriend() {
 
 
 // =====================================
-// FRIEND ONLINE STATUS
+// STATUS
 // =====================================
 
-function loadFriendStatus() {
+function loadStatus(){
 
-  if (!friendStatus) {
-    return;
-  }
-
-
-  const friendRef =
+  const ref =
     doc(
       db,
       "users",
@@ -249,11 +206,10 @@ function loadFriendStatus() {
 
 
   onSnapshot(
-    friendRef,
+    ref,
+    snap=>{
 
-    (snapshot) => {
-
-      if (!snapshot.exists()) {
+      if(!snap.exists()){
 
         friendStatus.textContent =
           "offline";
@@ -264,41 +220,22 @@ function loadFriendStatus() {
 
 
       const data =
-        snapshot.data();
+        snap.data();
 
 
-      if (data.online === true) {
-
-        friendStatus.innerHTML =
-          `<span style="
-            color:#25D366;
-            font-size:13px;
-          ">●</span> online`;
-
-      } else {
+      if(data.online === true){
 
         friendStatus.innerHTML =
-          `<span style="
-            color:#d3d3d3;
-            font-size:13px;
-          ">●</span> offline`;
+          "🟢 online";
+
+      }else{
+
+        friendStatus.innerHTML =
+          "⚪ offline";
 
       }
 
-    },
-
-    (error) => {
-
-      console.error(
-        "STATUS ERROR:",
-        error
-      );
-
-      friendStatus.textContent =
-        "offline";
-
     }
-
   );
 
 }
@@ -308,38 +245,20 @@ function loadFriendStatus() {
 // LOAD MESSAGES
 // =====================================
 
-function loadMessages() {
+function loadMessages(){
 
-  if (!messagesDiv) {
-    return;
-  }
-
-
-  const chatId =
-    getChatId(
-      currentUser.uid,
-      friendUid
-    );
-
-
-  console.log(
-    "CHAT ID:",
-    chatId
-  );
-
-
-  const messagesRef =
+  const ref =
     collection(
       db,
       "chats",
-      chatId,
+      chatId(),
       "messages"
     );
 
 
-  const messagesQuery =
+  const q =
     query(
-      messagesRef,
+      ref,
       orderBy(
         "time",
         "asc"
@@ -349,52 +268,54 @@ function loadMessages() {
 
   onSnapshot(
 
-    messagesQuery,
+    q,
 
-    (snapshot) => {
+    snapshot=>{
 
-      messagesDiv.innerHTML =
+      messages.innerHTML =
         "";
 
 
       snapshot.forEach(
-        (messageDoc) => {
-
-          const data =
-            messageDoc.data();
-
+        messageDoc=>{
 
           showMessage(
-            data
+            messageDoc.data()
           );
 
         }
       );
 
 
-      messagesDiv.scrollTop =
-        messagesDiv.scrollHeight;
+      messages.scrollTop =
+        messages.scrollHeight;
 
     },
 
-    (error) => {
+    error=>{
 
       console.error(
-        "MESSAGES ERROR:",
+        "MESSAGE ERROR:",
         error
       );
 
 
-      messagesDiv.innerHTML = `
+      messages.innerHTML = `
+
         <div style="
-          padding:20px;
           color:red;
           text-align:center;
+          padding:20px;
         ">
+
           Chat load नहीं हुई।
+
           <br><br>
+
           ${error.message}
+
         </div>
+
       `;
 
     }
@@ -408,31 +329,26 @@ function loadMessages() {
 // SHOW MESSAGE
 // =====================================
 
-function showMessage(data) {
+function showMessage(data){
 
   const box =
     document.createElement("div");
 
 
-  const isMine =
+  const mine =
     data.sender ===
     currentUser.uid;
 
 
   box.className =
-    "message-box " +
-    (
-      isMine
-        ? "my-message"
-        : "friend-message"
-    );
+    mine
+      ? "message mine"
+      : "message friend";
 
 
-  // ===================================
-  // IMAGE
-  // ===================================
+  // PHOTO
 
-  if (data.image) {
+  if(data.image){
 
     const img =
       document.createElement("img");
@@ -442,24 +358,14 @@ function showMessage(data) {
       data.image;
 
 
-    img.className =
-      "message-image";
-
-
-    img.alt =
-      "Photo";
-
-
     box.appendChild(img);
 
   }
 
 
-  // ===================================
   // TEXT
-  // ===================================
 
-  if (data.text) {
+  if(data.text){
 
     const text =
       document.createElement("div");
@@ -474,55 +380,51 @@ function showMessage(data) {
   }
 
 
-  // ===================================
-  // TIME + TICKS
-  // ===================================
+  // TIME
 
-  const bottom =
+  const time =
     document.createElement("div");
 
 
-  bottom.className =
-    "message-time";
+  time.className =
+    "time";
 
 
   let timeText = "";
 
 
-  if (
+  if(
     data.time &&
     data.time.toDate
-  ) {
+  ){
 
     timeText =
       data.time
-        .toDate()
-        .toLocaleTimeString(
-          [],
-          {
-            hour: "2-digit",
-            minute: "2-digit"
-          }
-        );
+      .toDate()
+      .toLocaleTimeString(
+        [],
+        {
+          hour:"2-digit",
+          minute:"2-digit"
+        }
+      );
 
   }
 
 
-  bottom.innerHTML =
+  time.innerHTML =
     timeText +
     (
-      isMine
-        ? ` <span class="ticks">✓✓</span>`
+      mine
+        ? " ✓✓"
         : ""
     );
 
 
-  box.appendChild(
-    bottom
-  );
+  box.appendChild(time);
 
 
-  messagesDiv.appendChild(
+  messages.appendChild(
     box
   );
 
@@ -533,69 +435,53 @@ function showMessage(data) {
 // SEND BUTTON
 // =====================================
 
-if (sendBtn) {
+sendBtn.addEventListener(
+  "click",
+  sendMessage
+);
 
-  sendBtn.addEventListener(
-    "click",
-    () => {
+
+// =====================================
+// ENTER
+// =====================================
+
+messageInput.addEventListener(
+  "keydown",
+  event=>{
+
+    if(
+      event.key ===
+      "Enter"
+    ){
+
+      event.preventDefault();
 
       sendMessage();
 
     }
-  );
 
-}
-
-
-// =====================================
-// ENTER KEY
-// =====================================
-
-if (messageInput) {
-
-  messageInput.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (
-        event.key === "Enter"
-      ) {
-
-        event.preventDefault();
-
-        sendMessage();
-
-      }
-
-    }
-  );
-
-}
+  }
+);
 
 
 // =====================================
 // SEND MESSAGE
 // =====================================
 
-async function sendMessage() {
-
-  if (!messageInput) {
-    return;
-  }
-
+async function sendMessage(){
 
   const text =
     messageInput.value.trim();
 
 
-  // खाली message नहीं
-  if (!text) {
+  if(!text){
+
     return;
+
   }
 
 
-  // Login check
-  if (!currentUser) {
+  if(!currentUser){
 
     alert(
       "Please login first"
@@ -606,99 +492,60 @@ async function sendMessage() {
   }
 
 
-  // Friend check
-  if (!friendUid) {
-
-    alert(
-      "Friend select नहीं है"
-    );
-
-    return;
-
-  }
-
-
-  // ===================================
-  // SAVE ORIGINAL TEXT
-  // ===================================
+  // Save text
 
   const originalText =
     text;
 
 
-  // ===================================
-  // BUTTON LOCK
-  // ===================================
+  // =================================
+  // SHOW TEMP MESSAGE
+  // =================================
 
-  if (sendBtn) {
-
-    sendBtn.disabled =
-      true;
-
-    sendBtn.style.opacity =
-      "0.6";
-
-  }
-
-
-  // ===================================
-  // TEMP MESSAGE
-  // ===================================
-
-  const tempBox =
+  const temp =
     document.createElement("div");
 
 
-  tempBox.className =
-    "message-box my-message";
+  temp.className =
+    "message mine";
 
 
-  tempBox.innerHTML = `
+  temp.innerHTML = `
 
     <div>
-      ${escapeHTML(originalText)}
+      ${escapeText(originalText)}
     </div>
 
-    <div
-      class="message-time"
-      style="opacity:.6;"
-    >
+    <div class="time">
       Sending...
     </div>
 
   `;
 
 
-  messagesDiv.appendChild(
-    tempBox
+  messages.appendChild(
+    temp
   );
 
 
-  messagesDiv.scrollTop =
-    messagesDiv.scrollHeight;
+  messages.scrollTop =
+    messages.scrollHeight;
 
 
-  try {
+  // Disable button
 
-    const chatId =
-      getChatId(
-        currentUser.uid,
-        friendUid
-      );
+  sendBtn.disabled =
+    true;
 
 
-    console.log(
-      "Sending to:",
-      chatId
-    );
-
+  try{
 
     await addDoc(
 
       collection(
         db,
         "chats",
-        chatId,
+        chatId(),
         "messages"
       ),
 
@@ -721,10 +568,7 @@ async function sendMessage() {
     );
 
 
-    // =================================
-    // SUCCESS
-    // =================================
-
+    // Clear input
     messageInput.value =
       "";
 
@@ -732,30 +576,31 @@ async function sendMessage() {
     messageInput.focus();
 
 
-    tempBox.remove();
+    // Remove temporary
+    temp.remove();
 
 
     console.log(
       "MESSAGE SENT ✅"
     );
 
-  } catch (error) {
+
+  }catch(error){
 
     console.error(
-      "MESSAGE SEND ERROR:",
+      "SEND ERROR:",
       error
     );
 
 
-    // Sending box को failed दिखाओ
-    tempBox.innerHTML = `
+    temp.innerHTML = `
 
       <div>
-        ${escapeHTML(originalText)}
+        ${escapeText(originalText)}
       </div>
 
       <div
-        class="message-time"
+        class="time"
         style="color:red;"
       >
         Failed ❌
@@ -772,28 +617,17 @@ async function sendMessage() {
   }
 
 
-  // ===================================
-  // BUTTON UNLOCK
-  // ===================================
-
-  if (sendBtn) {
-
-    sendBtn.disabled =
-      false;
-
-    sendBtn.style.opacity =
-      "1";
-
-  }
+  sendBtn.disabled =
+    false;
 
 }
 
 
 // =====================================
-// HTML ESCAPE
+// ESCAPE TEXT
 // =====================================
 
-function escapeHTML(text) {
+function escapeText(text){
 
   const div =
     document.createElement("div");
@@ -807,31 +641,33 @@ function escapeHTML(text) {
 
 
 // =====================================
+// PHOTO SELECT
+// =====================================
+
+chatPhoto.addEventListener(
+  "change",
+  sendPhoto
+);
+
+
+// =====================================
 // SEND PHOTO
 // =====================================
 
-if (chatPhoto) {
-
-  chatPhoto.addEventListener(
-    "change",
-    sendPhoto
-  );
-
-}
-
-
-async function sendPhoto() {
+async function sendPhoto(){
 
   const file =
     chatPhoto.files[0];
 
 
-  if (!file) {
+  if(!file){
+
     return;
+
   }
 
 
-  if (!currentUser) {
+  if(!currentUser){
 
     alert(
       "Please login first"
@@ -842,11 +678,10 @@ async function sendPhoto() {
   }
 
 
-  // 10 MB limit
-  if (
+  if(
     file.size >
     10 * 1024 * 1024
-  ) {
+  ){
 
     alert(
       "Photo 10 MB से छोटी होनी चाहिए।"
@@ -860,144 +695,11 @@ async function sendPhoto() {
   }
 
 
-  // ===================================
-  // BUTTON DISABLE
-  // ===================================
-
-  if (sendBtn) {
-
-    sendBtn.disabled =
-      true;
-
-    sendBtn.style.opacity =
-      "0.6";
-
-  }
+  sendBtn.disabled =
+    true;
 
 
-  try {
-
-    const formData =
-      new FormData();
-
-
-    formData.append(
-      "file",
-      file
-    );
-
-
-    formData.append(
-      "upload_preset",
-      "swlqxqgn"
-    );
-
+  try{
 
     // =================================
-    // CLOUDINARY
-    // =================================
-
-    const response =
-      await fetch(
-        "https://api.cloudinary.com/v1_1/rmt792pr/image/upload",
-        {
-          method: "POST",
-          body: formData
-        }
-      );
-
-
-    const result =
-      await response.json();
-
-
-    console.log(
-      "CLOUDINARY:",
-      result
-    );
-
-
-    if (!result.secure_url) {
-
-      throw new Error(
-        result.error?.message ||
-        "Photo upload failed"
-      );
-
-    }
-
-
-    // =================================
-    // FIRESTORE
-    // =================================
-
-    const chatId =
-      getChatId(
-        currentUser.uid,
-        friendUid
-      );
-
-
-    await addDoc(
-
-      collection(
-        db,
-        "chats",
-        chatId,
-        "messages"
-      ),
-
-      {
-
-        image:
-          result.secure_url,
-
-        sender:
-          currentUser.uid,
-
-        receiver:
-          friendUid,
-
-        time:
-          serverTimestamp()
-
-      }
-
-    );
-
-
-    chatPhoto.value =
-      "";
-
-
-    console.log(
-      "PHOTO SENT ✅"
-    );
-
-  } catch (error) {
-
-    console.error(
-      "PHOTO ERROR:",
-      error
-    );
-
-
-    alert(
-      "Photo send नहीं हुई:\n\n" +
-      error.message
-    );
-
-  }
-
-
-  if (sendBtn) {
-
-    sendBtn.disabled =
-      false;
-
-    sendBtn.style.opacity =
-      "1";
-
-  }
-
-}
+    //
