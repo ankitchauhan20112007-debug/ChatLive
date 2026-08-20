@@ -680,6 +680,55 @@
   }
 
 </script>
+<script>
+const menuBtn = document.getElementById("menuBtn");
+
+menuBtn.addEventListener("click", function () {
+
+  let menu = document.getElementById("simpleMenu");
+
+  if (menu) {
+    menu.remove();
+    return;
+  }
+
+  menu = document.createElement("div");
+
+  menu.id = "simpleMenu";
+
+  menu.style.cssText = `
+    position:fixed;
+    top:60px;
+    right:8px;
+    width:190px;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 3px 12px rgba(0,0,0,.25);
+    z-index:99999;
+    overflow:hidden;
+  `;
+
+  menu.innerHTML = `
+    <div style="padding:14px;">
+      🔍 Search
+    </div>
+
+    <div style="padding:14px;">
+      🖼️ Media
+    </div>
+
+    <div style="padding:14px;">
+      🔕 Mute notifications
+    </div>
+
+    <div style="padding:14px;">
+      🗑️ Clear chat
+    </div>
+  `;
+
+  document.body.appendChild(menu);
+});
+</script>
 
 
 </body>
