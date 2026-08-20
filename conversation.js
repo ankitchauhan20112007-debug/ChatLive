@@ -1142,3 +1142,38 @@ function escapeHTML(text) {
   return div.innerHTML;
 
 }
+// ================================
+// 3 DOT MENU
+// ================================
+
+const menuBtn =
+  document.getElementById("menuBtn");
+
+const chatMenu =
+  document.getElementById("chatMenu");
+
+
+if (menuBtn && chatMenu) {
+
+  menuBtn.addEventListener(
+    "click",
+    (event) => {
+
+      event.stopPropagation();
+
+      chatMenu.classList.toggle("show");
+
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    () => {
+
+      chatMenu.classList.remove("show");
+
+    }
+  );
+
+}
