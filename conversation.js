@@ -24,7 +24,7 @@ const messagesDiv =
   document.getElementById("messages");
 
 const messageInput =
-  document.getElementById("messageInput");
+  document.getElementById("message");
 
 const sendBtn =
   document.getElementById("sendBtn");
@@ -58,8 +58,7 @@ if (!friendUid) {
 
   alert("Friend select नहीं हुआ।");
 
-  window.location.href =
-    "chat.html";
+  window.location.href = "chat.html";
 }
 
 
@@ -92,8 +91,7 @@ onAuthStateChanged(
       return;
     }
 
-
-    loadFriend(user);
+    loadFriend();
 
     loadMessages(user);
 
@@ -105,19 +103,14 @@ onAuthStateChanged(
 // FRIEND INFO
 // ===============================
 
-async function loadFriend(currentUser) {
+function loadFriend() {
 
   friendName.textContent =
     savedFriendName || "User";
 
-
-  // Default status
-
   friendStatus.textContent =
-    "offline";
+    "Checking...";
 
-
-  // Firestore realtime listener
 
   const friendRef =
     doc(
@@ -176,7 +169,7 @@ async function loadFriend(currentUser) {
           "offline";
 
         friendStatus.style.color =
-          "#ccc";
+          "#ddd";
 
       }
 
@@ -234,12 +227,11 @@ function loadMessages(currentUser) {
 
           createMessage(
             data,
-            messageDoc.id,
             currentUser.uid
           );
 
 
-          // Friend ka message read
+          // Friend message read
 
           if (
             data.sender === friendUid &&
@@ -258,7 +250,7 @@ function loadMessages(currentUser) {
       );
 
 
-      // Bottom par scroll
+      // Scroll bottom
 
       setTimeout(
         () => {
@@ -292,7 +284,6 @@ function loadMessages(currentUser) {
 
 function createMessage(
   data,
-  messageId,
   currentUid
 ) {
 
@@ -338,10 +329,8 @@ function createMessage(
     image.src =
       data.image;
 
-
     image.className =
       "message-image";
-
 
     image.loading =
       "lazy";
@@ -358,12 +347,12 @@ function createMessage(
   // TIME
   // ===============================
 
-  const time =
+  const bottom =
     document.createElement("div");
 
 
-  time.className =
-    "message-time";
+  bottom.className =
+    "message-bottom";
 
 
   let timeText =
@@ -387,7 +376,7 @@ function createMessage(
           }
         );
 
-    } catch (e) {
+    } catch (error) {
 
       timeText = "";
 
@@ -396,7 +385,7 @@ function createMessage(
   }
 
 
-  time.textContent =
+  bottom.textContent =
     timeText;
 
 
@@ -412,17 +401,23 @@ function createMessage(
       document.createElement("span");
 
 
+    ticks.className =
+      "ticks";
+
+
     ticks.textContent =
       data.read
-        ? " ✓✓"
-        : " ✓";
+        ? "✓✓"
+        : "✓";
 
 
-    ticks.style.marginLeft =
-      "4px";
+    ticks.style.color =
+      data.read
+        ? "#128CDB"
+        : "#777";
 
 
-    time.appendChild(
+    bottom.appendChild(
       ticks
     );
 
@@ -430,7 +425,7 @@ function createMessage(
 
 
   box.appendChild(
-    time
+    bottom
   );
 
 
@@ -452,7 +447,11 @@ async function sendMessage() {
 
 
   if (!currentUser) {
+
+    alert("Please login first.");
+
     return;
+
   }
 
 
@@ -460,12 +459,8 @@ async function sendMessage() {
     messageInput.value.trim();
 
 
-  // Empty message
-
   if (!text) {
-
     return;
-
   }
 
 
@@ -486,8 +481,6 @@ async function sendMessage() {
 
 
   try {
-
-    // Button disable
 
     sendBtn.disabled =
       true;
@@ -518,8 +511,6 @@ async function sendMessage() {
       }
     );
 
-
-    // Input clear
 
     messageInput.value =
       "";
@@ -575,8 +566,7 @@ if (messageInput) {
     (event) => {
 
       if (
-        event.key === "Enter" &&
-        !event.shiftKey
+        event.key === "Enter"
       ) {
 
         event.preventDefault();
@@ -592,7 +582,7 @@ if (messageInput) {
 
 
 // ===============================
-// MARK MESSAGE READ
+// MARK AS READ
 // ===============================
 
 async function markAsRead(
