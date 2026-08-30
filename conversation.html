@@ -17,18 +17,22 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       font-family: Arial, sans-serif;
       background: #efeae2;
     }
 
     .chat-page {
+      width: 100%;
       height: 100vh;
       display: flex;
       flex-direction: column;
     }
-
 
     /* =========================
        HEADER
@@ -36,6 +40,7 @@
 
     .chat-header {
       height: 65px;
+      min-height: 65px;
 
       background: #075E54;
       color: white;
@@ -44,30 +49,29 @@
       align-items: center;
 
       padding: 7px 10px;
-
       gap: 9px;
 
-      flex-shrink: 0;
+      position: relative;
+      z-index: 100;
     }
-
 
     .back-btn {
       color: white;
-
       text-decoration: none;
 
       font-size: 32px;
+      line-height: 1;
 
       padding: 3px;
-    }
 
+      flex-shrink: 0;
+    }
 
     #friendPhoto {
       width: 45px;
       height: 45px;
 
       border-radius: 50%;
-
       object-fit: cover;
 
       background: #ddd;
@@ -75,57 +79,44 @@
       flex-shrink: 0;
     }
 
-
     .friend-info {
       flex: 1;
-
       min-width: 0;
     }
 
-
     #friendName {
       font-size: 20px;
-
       font-weight: bold;
 
       white-space: nowrap;
-
       overflow: hidden;
-
       text-overflow: ellipsis;
     }
 
-
     #friendStatus {
-      font-size: 12px;
-
+      font-size: 13px;
       margin-top: 2px;
     }
 
-
     /* =========================
-       3 DOT MENU
+       THREE DOT BUTTON
     ========================= */
 
     .header-menu {
       position: relative;
-
       flex-shrink: 0;
     }
 
-
     #menuBtn {
-      width: 40px;
-      height: 48px;
-
-      background: transparent;
+      width: 42px;
+      height: 52px;
 
       border: none;
+      background: transparent;
 
       color: white;
 
       font-size: 30px;
-
       line-height: 1;
 
       padding: 0;
@@ -133,6 +124,9 @@
       cursor: pointer;
     }
 
+    /* =========================
+       MENU
+    ========================= */
 
     .chat-menu {
       display: none;
@@ -140,8 +134,7 @@
       position: absolute;
 
       right: 0;
-
-      top: 50px;
+      top: 55px;
 
       width: 190px;
 
@@ -150,18 +143,16 @@
       border-radius: 8px;
 
       box-shadow:
-        0 3px 12px rgba(0,0,0,.25);
+        0 3px 15px rgba(0,0,0,.3);
 
       overflow: hidden;
 
       z-index: 9999;
     }
 
-
     .chat-menu.show {
       display: block;
     }
-
 
     .chat-menu button {
       width: 100%;
@@ -181,11 +172,9 @@
       cursor: pointer;
     }
 
-
     .chat-menu button:active {
       background: #eeeeee;
     }
-
 
     /* =========================
        MESSAGES
@@ -201,10 +190,8 @@
       background: #efeae2;
 
       display: flex;
-
       flex-direction: column;
     }
-
 
     .message-box {
       max-width: 78%;
@@ -223,7 +210,6 @@
         0 1px 2px rgba(0,0,0,.15);
     }
 
-
     .my-message {
       align-self: flex-end;
 
@@ -231,7 +217,6 @@
 
       border-bottom-right-radius: 3px;
     }
-
 
     .friend-message {
       align-self: flex-start;
@@ -241,17 +226,14 @@
       border-bottom-left-radius: 3px;
     }
 
-
     .message-image {
       width: 100%;
-
       max-width: 300px;
 
       border-radius: 10px;
 
       display: block;
     }
-
 
     .message-bottom {
       text-align: right;
@@ -263,16 +245,13 @@
       margin-top: 4px;
     }
 
-
     .ticks {
       font-size: 12px;
-
       margin-left: 3px;
     }
 
-
     /* =========================
-       MESSAGE INPUT
+       COMPOSER
     ========================= */
 
     .composer {
@@ -291,10 +270,8 @@
       border-top: 1px solid #ddd;
     }
 
-
     .camera-btn {
       width: 52px;
-
       height: 52px;
 
       border-radius: 50%;
@@ -306,7 +283,6 @@
       display: flex;
 
       align-items: center;
-
       justify-content: center;
 
       font-size: 27px;
@@ -316,13 +292,12 @@
       cursor: pointer;
     }
 
-
     #message {
       flex: 1;
 
       height: 52px;
 
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
 
       border-radius: 28px;
 
@@ -335,15 +310,12 @@
       min-width: 0;
     }
 
-
     #message:focus {
       border-color: #075E54;
     }
 
-
     #sendBtn {
       width: 58px;
-
       height: 58px;
 
       border: none;
@@ -354,18 +326,55 @@
 
       color: white;
 
-      font-size: 27px;
+      font-size: 28px;
 
       cursor: pointer;
 
       flex-shrink: 0;
     }
 
+    #sendBtn:active {
+      transform: scale(.95);
+    }
 
-    #sendBtn:disabled {
-      opacity: .5;
+    /* =========================
+       MOBILE
+    ========================= */
 
-      cursor: default;
+    @media (max-width: 400px) {
+
+      .chat-header {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+
+      #friendPhoto {
+        width: 43px;
+        height: 43px;
+      }
+
+      #friendName {
+        font-size: 18px;
+      }
+
+      .composer {
+        gap: 5px;
+        padding: 7px 6px;
+      }
+
+      .camera-btn {
+        width: 50px;
+        height: 50px;
+      }
+
+      #sendBtn {
+        width: 54px;
+        height: 54px;
+      }
+
+      #message {
+        font-size: 16px;
+      }
     }
 
   </style>
@@ -375,16 +384,13 @@
 
 <body>
 
-
 <div class="chat-page">
-
 
   <!-- =========================
        HEADER
   ========================= -->
 
   <div class="chat-header">
-
 
     <a
       href="chat.html"
@@ -397,7 +403,7 @@
     <img
       id="friendPhoto"
       src="https://via.placeholder.com/100"
-      alt=""
+      alt="Profile"
     >
 
 
@@ -412,24 +418,9 @@
       </div>
 
     </div>
-<button
-  id="menuBtn"
-  type="button"
-  style="
-    background:none;
-    border:none;
-    color:white;
-    font-size:30px;
-    padding:5px 10px;
-  "
->
-  ⋮
-</button>
 
 
-    <!-- =====================
-         3 DOT
-    ====================== -->
+    <!-- ONLY ONE MENU BUTTON -->
 
     <div class="header-menu">
 
@@ -492,11 +483,10 @@
 
 
   <!-- =========================
-       COMPOSER
+       MESSAGE BOX
   ========================= -->
 
   <div class="composer">
-
 
     <label
       for="chatPhoto"
@@ -529,15 +519,13 @@
       ➤
     </button>
 
-
   </div>
-
 
 </div>
 
 
 <!-- =========================
-     JAVASCRIPT
+     ONLY ONE conversation.js
 ========================= -->
 
 <script
@@ -548,9 +536,9 @@
 
 <script>
 
-  // =========================
-  // 3 DOT MENU
-  // =========================
+  /* =========================
+     THREE DOT MENU
+  ========================= */
 
   const menuBtn =
     document.getElementById("menuBtn");
@@ -559,58 +547,43 @@
     document.getElementById("chatMenu");
 
 
-  if (menuBtn && chatMenu) {
+  menuBtn.addEventListener(
+    "click",
+    function(event) {
 
-    menuBtn.addEventListener(
-      "click",
-      function(event) {
+      event.stopPropagation();
 
-        event.stopPropagation();
+      chatMenu.classList.toggle("show");
 
-        chatMenu.classList.toggle(
-          "show"
-        );
-
-      }
-    );
+    }
+  );
 
 
-    document.addEventListener(
-      "click",
-      function() {
+  /* =========================
+     CLOSE MENU
+  ========================= */
 
-        chatMenu.classList.remove(
-          "show"
-        );
+  document.addEventListener(
+    "click",
+    function() {
 
-      }
-    );
+      chatMenu.classList.remove("show");
 
-  }
-
-
-  // =========================
-  // MENU BUTTONS
-  // =========================
-
-  const searchBtn =
-    document.getElementById("searchBtn");
-
-  const mediaBtn =
-    document.getElementById("mediaBtn");
-
-  const muteBtn =
-    document.getElementById("muteBtn");
-
-  const clearChatBtn =
-    document.getElementById("clearChatBtn");
+    }
+  );
 
 
-  if (searchBtn) {
+  /* =========================
+     SEARCH
+  ========================= */
 
-    searchBtn.addEventListener(
+  document
+    .getElementById("searchBtn")
+    .addEventListener(
       "click",
       function() {
+
+        chatMenu.classList.remove("show");
 
         alert(
           "Search feature next step me banayenge."
@@ -619,14 +592,18 @@
       }
     );
 
-  }
 
+  /* =========================
+     MEDIA
+  ========================= */
 
-  if (mediaBtn) {
-
-    mediaBtn.addEventListener(
+  document
+    .getElementById("mediaBtn")
+    .addEventListener(
       "click",
       function() {
+
+        chatMenu.classList.remove("show");
 
         alert(
           "Media feature next step me banayenge."
@@ -635,38 +612,46 @@
       }
     );
 
-  }
 
+  /* =========================
+     MUTE
+  ========================= */
 
-  if (muteBtn) {
-
-    muteBtn.addEventListener(
+  document
+    .getElementById("muteBtn")
+    .addEventListener(
       "click",
       function() {
 
+        chatMenu.classList.remove("show");
+
         alert(
-          "Mute feature next step me banayenge."
+          "Mute notifications next step me banayenge."
         );
 
       }
     );
 
-  }
 
+  /* =========================
+     CLEAR CHAT
+  ========================= */
 
-  if (clearChatBtn) {
-
-    clearChatBtn.addEventListener(
+  document
+    .getElementById("clearChatBtn")
+    .addEventListener(
       "click",
       function() {
 
-        const confirmDelete =
+        chatMenu.classList.remove("show");
+
+        const ok =
           confirm(
             "Kya aap chat clear karna chahte ho?"
           );
 
 
-        if (confirmDelete) {
+        if (ok) {
 
           alert(
             "Clear chat feature next step me banayenge."
@@ -677,60 +662,7 @@
       }
     );
 
-  }
-
 </script>
-<script>
-const menuBtn = document.getElementById("menuBtn");
-
-menuBtn.addEventListener("click", function () {
-
-  let menu = document.getElementById("simpleMenu");
-
-  if (menu) {
-    menu.remove();
-    return;
-  }
-
-  menu = document.createElement("div");
-
-  menu.id = "simpleMenu";
-
-  menu.style.cssText = `
-    position:fixed;
-    top:60px;
-    right:8px;
-    width:190px;
-    background:white;
-    border-radius:8px;
-    box-shadow:0 3px 12px rgba(0,0,0,.25);
-    z-index:99999;
-    overflow:hidden;
-  `;
-
-  menu.innerHTML = `
-    <div style="padding:14px;">
-      🔍 Search
-    </div>
-
-    <div style="padding:14px;">
-      🖼️ Media
-    </div>
-
-    <div style="padding:14px;">
-      🔕 Mute notifications
-    </div>
-
-    <div style="padding:14px;">
-      🗑️ Clear chat
-    </div>
-  `;
-
-  document.body.appendChild(menu);
-});
-</script>
-
 
 </body>
-
 </html>
