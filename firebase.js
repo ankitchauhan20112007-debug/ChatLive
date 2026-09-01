@@ -17,14 +17,13 @@ import {
 
 // Firebase Console से copied config
 const firebaseConfig = {
-  apiKey: "PASTE_COPIED_API_KEY",
+  apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
   authDomain: "chatlive-bac03.firebaseapp.com",
   projectId: "chatlive-bac03",
   storageBucket: "chatlive-bac03.firebasestorage.app",
   messagingSenderId: "1097708548558",
   appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
 };
-
 
 // Initialize
 const app = initializeApp(firebaseConfig);
