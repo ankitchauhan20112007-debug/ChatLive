@@ -1,21 +1,33 @@
+// ===============================
+// FIREBASE APP
+// ===============================
+
 import {
   initializeApp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+
+// ===============================
+// FIREBASE AUTH
+// ===============================
 
 import {
   getAuth
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
+
+// ===============================
+// FIRESTORE
+// ===============================
+
 import {
   getFirestore
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-import {
-  getStorage
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
-
-// Firebase Console से copied config
+// ===============================
+// FIREBASE CONFIG
+// ===============================c 
 const firebaseConfig = {
   apiKey: "AIzaSyCQW8TYSFy1G6cXeGyYyscnWnh9Kqk5g6o",
   authDomain: "chatlive-bac03.firebaseapp.com",
@@ -25,19 +37,36 @@ const firebaseConfig = {
   appId: "1:1097708548558:web:32a13c6cf0b624a2eafb9f"
 };
 
-// Initialize
-const app = initializeApp(firebaseConfig);
+
+// ===============================
+// INITIALIZE FIREBASE
+// ===============================
+
+const app =
+  initializeApp(firebaseConfig);
 
 
-// Firebase services
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// ===============================
+// AUTH
+// ===============================
+
+const auth =
+  getAuth(app);
 
 
-// Export
+// ===============================
+// FIRESTORE
+// ===============================
+
+const db =
+  getFirestore(app);
+
+
+// ===============================
+// EXPORT
+// ===============================
+
 export {
   auth,
-  db,
-  storage
+  db
 };
