@@ -16,6 +16,10 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+import {
+  uploadToCloudinary
+} from "./cloudinary.js";
+
 
 /* =========================
    ELEMENTS
@@ -296,6 +300,8 @@ function createMessage(
       : "message-box friend-message";
 
 
+  /* TEXT */
+
   if (data.text) {
 
     const text =
@@ -308,6 +314,8 @@ function createMessage(
 
   }
 
+
+  /* IMAGE */
 
   if (data.image) {
 
@@ -323,10 +331,24 @@ function createMessage(
     image.loading =
       "lazy";
 
+    image.alt =
+      "Chat photo";
+
+    image.onerror = () => {
+
+      console.error(
+        "Image load failed:",
+        data.image
+      );
+
+    };
+
     box.appendChild(image);
 
   }
 
+
+  /* TIME */
 
   const bottom =
     document.createElement("div");
@@ -367,6 +389,8 @@ function createMessage(
   bottom.textContent =
     timeText;
 
+
+  /* TICKS */
 
   if (data.sender === currentUid) {
 
@@ -410,7 +434,7 @@ function createMessage(
 
 
 /* =========================
-   SEND TEXT MESSAGE
+   SEND TEXT + PHOTO
 ========================= */
 
 async function sendMessage() {
@@ -431,7 +455,17 @@ async function sendMessage() {
     messageInput.value.trim();
 
 
-  if (!text) return;
+  const file =
+    chatPhoto.files[0];
+
+
+  /* TEXT और PHOTO दोनों खाली हैं */
+
+  if (!text && !file) {
+
+    return;
+
+  }
 
 
   const chatId =
@@ -456,9 +490,35 @@ async function sendMessage() {
       true;
 
 
+    let imageUrl = "";
+
+
+    /* =========================
+       PHOTO UPLOAD
+    ========================= */
+
+    if (file) {
+
+      sendBtn.textContent =
+        "⏳";
+
+
+      imageUrl =
+        await uploadToCloudinary(
+          file
+        );
+
+    }
+
+
+    /* =========================
+       SAVE MESSAGE
+    ========================= */
+
     await addDoc(
       messagesRef,
       {
+
         sender:
           currentUser.uid,
 
@@ -469,18 +529,24 @@ async function sendMessage() {
           text,
 
         image:
-          "",
+          imageUrl,
 
         read:
           false,
 
         createdAt:
           serverTimestamp()
+
       }
     );
 
 
+    /* CLEAR INPUT */
+
     messageInput.value =
+      "";
+
+    chatPhoto.value =
       "";
 
     messageInput.focus();
@@ -495,12 +561,15 @@ async function sendMessage() {
 
 
     alert(
-      "Message send नहीं हुआ:\n" +
+      "Message/photo send नहीं हुआ:\n" +
       error.message
     );
 
   }
 
+
+  sendBtn.textContent =
+    "➤";
 
   sendBtn.disabled =
     false;
@@ -588,20 +657,27 @@ async function markAsRead(
 
 }
 
+
 /* =========================
    THREE DOT MENU
 ========================= */
 
 if (menuBtn && chatMenu) {
 
-  menuBtn.addEventListener("click", (event) => {
+  menuBtn.addEventListener(
+    "click",
+    (event) => {
 
-    event.preventDefault();
-    event.stopPropagation();
+      event.preventDefault();
 
-    chatMenu.classList.toggle("show");
+      event.stopPropagation();
 
-  });
+      chatMenu.classList.toggle(
+        "show"
+      );
+
+    }
+  );
 
 }
 
@@ -610,19 +686,26 @@ if (menuBtn && chatMenu) {
    CLOSE MENU
 ========================= */
 
-document.addEventListener("click", (event) => {
+document.addEventListener(
+  "click",
+  (event) => {
 
-  if (
-    chatMenu &&
-    !chatMenu.contains(event.target) &&
-    event.target !== menuBtn
-  ) {
+    if (
+      chatMenu &&
+      !chatMenu.contains(
+        event.target
+      ) &&
+      event.target !== menuBtn
+    ) {
 
-    chatMenu.classList.remove("show");
+      chatMenu.classList.remove(
+        "show"
+      );
+
+    }
 
   }
-
-});
+);
 
 
 /* =========================
@@ -631,29 +714,53 @@ document.addEventListener("click", (event) => {
 
 if (searchBtn) {
 
-  searchBtn.addEventListener("click", () => {
+  searchBtn.addEventListener(
+    "click",
+    () => {
 
-    if (chatMenu) {
-      chatMenu.classList.remove("show");
+      if (chatMenu) {
+
+        chatMenu.classList.remove(
+          "show"
+        );
+
+      }
+
+
+      if (
+        !searchBox ||
+        !searchInput
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        searchBox.style.display ===
+        "block"
+      ) {
+
+        searchBox.style.display =
+          "none";
+
+        searchInput.value =
+          "";
+
+        applySearch();
+
+      } else {
+
+        searchBox.style.display =
+          "block";
+
+        searchInput.focus();
+
+      }
+
     }
-
-    if (!searchBox || !searchInput) return;
-
-    if (searchBox.style.display === "block") {
-
-      searchBox.style.display = "none";
-      searchInput.value = "";
-
-      applySearch();
-
-    } else {
-
-      searchBox.style.display = "block";
-      searchInput.focus();
-
-    }
-
-  });
+  );
 
 }
 
@@ -664,36 +771,58 @@ if (searchBtn) {
 
 if (searchInput) {
 
-  searchInput.addEventListener("input", () => {
+  searchInput.addEventListener(
+    "input",
+    () => {
 
-    applySearch();
+      applySearch();
 
-  });
+    }
+  );
 
 }
 
 
 function applySearch() {
 
-  if (!messagesDiv || !searchInput) return;
+  if (
+    !messagesDiv ||
+    !searchInput
+  ) {
+
+    return;
+
+  }
+
 
   const search =
-    searchInput.value.trim().toLowerCase();
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
 
   const allMessages =
-    document.querySelectorAll(".message-box");
+    document.querySelectorAll(
+      ".message-box"
+    );
 
-  allMessages.forEach((message) => {
 
-    const text =
-      message.textContent.toLowerCase();
+  allMessages.forEach(
+    (message) => {
 
-    message.style.display =
-      search === "" || text.includes(search)
-        ? ""
-        : "none";
+      const text =
+        message.textContent
+          .toLowerCase();
 
-  });
+
+      message.style.display =
+        search === "" ||
+        text.includes(search)
+          ? ""
+          : "none";
+
+    }
+  );
 
 }
 
@@ -704,28 +833,43 @@ function applySearch() {
 
 if (mediaBtn) {
 
-  mediaBtn.addEventListener("click", () => {
+  mediaBtn.addEventListener(
+    "click",
+    () => {
 
-    if (chatMenu) {
-      chatMenu.classList.remove("show");
+      if (chatMenu) {
+
+        chatMenu.classList.remove(
+          "show"
+        );
+
+      }
+
+
+      const images =
+        document.querySelectorAll(
+          ".message-image"
+        );
+
+
+      if (images.length === 0) {
+
+        alert(
+          "इस chat में अभी कोई photo नहीं है।"
+        );
+
+        return;
+
+      }
+
+
+      images[0].scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
     }
-
-    const images =
-      document.querySelectorAll(".message-image");
-
-    if (images.length === 0) {
-
-      alert("इस chat में अभी कोई photo नहीं है।");
-      return;
-
-    }
-
-    images[0].scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-
-  });
+  );
 
 }
 
@@ -735,15 +879,20 @@ if (mediaBtn) {
 ========================= */
 
 let isMuted =
-  localStorage.getItem("chatMuted_" + friendUid) === "true";
+  localStorage.getItem(
+    "chatMuted_" + friendUid
+  ) === "true";
 
 
 function updateMuteButton() {
 
   if (!muteBtn) return;
 
+
   muteBtn.textContent =
-    isMuted ? "🔔 Unmute" : "🔕 Mute";
+    isMuted
+      ? "🔔 Unmute"
+      : "🔕 Mute";
 
 }
 
@@ -752,22 +901,34 @@ if (muteBtn) {
 
   updateMuteButton();
 
-  muteBtn.addEventListener("click", () => {
 
-    isMuted = !isMuted;
+  muteBtn.addEventListener(
+    "click",
+    () => {
 
-    localStorage.setItem(
-      "chatMuted_" + friendUid,
-      isMuted
-    );
+      isMuted =
+        !isMuted;
 
-    updateMuteButton();
 
-    if (chatMenu) {
-      chatMenu.classList.remove("show");
+      localStorage.setItem(
+        "chatMuted_" + friendUid,
+        isMuted
+      );
+
+
+      updateMuteButton();
+
+
+      if (chatMenu) {
+
+        chatMenu.classList.remove(
+          "show"
+        );
+
+      }
+
     }
-
-  });
+  );
 
 }
 
@@ -778,77 +939,110 @@ if (muteBtn) {
 
 if (clearChatBtn) {
 
-  clearChatBtn.addEventListener("click", async () => {
+  clearChatBtn.addEventListener(
+    "click",
+    async () => {
 
-    if (chatMenu) {
-      chatMenu.classList.remove("show");
-    }
+      if (chatMenu) {
 
-    const currentUser = auth.currentUser;
-
-    if (!currentUser) return;
-
-    const confirmClear = confirm(
-      "क्या आप इस chat के सारे messages हटाना चाहते हैं?"
-    );
-
-    if (!confirmClear) return;
-
-    const chatId =
-      getChatId(currentUser.uid, friendUid);
-
-    const messagesRef =
-      collection(
-        db,
-        "chats",
-        chatId,
-        "messages"
-      );
-
-    try {
-
-      const snapshot =
-        await new Promise((resolve, reject) => {
-
-          const unsubscribe = onSnapshot(
-            messagesRef,
-            (snap) => {
-              unsubscribe();
-              resolve(snap);
-            },
-            reject
-          );
-
-        });
-
-      for (const messageDoc of snapshot.docs) {
-
-        await deleteDoc(
-          doc(
-            db,
-            "chats",
-            chatId,
-            "messages",
-            messageDoc.id
-          )
+        chatMenu.classList.remove(
+          "show"
         );
 
       }
 
-    } catch (error) {
 
-      console.error(
-        "Clear chat error:",
-        error
-      );
+      const currentUser =
+        auth.currentUser;
 
-      alert(
-        "Chat clear नहीं हुई:\n" +
-        error.message
-      );
+
+      if (!currentUser) return;
+
+
+      const confirmClear =
+        confirm(
+          "क्या आप इस chat के सारे messages हटाना चाहते हैं?"
+        );
+
+
+      if (!confirmClear) return;
+
+
+      const chatId =
+        getChatId(
+          currentUser.uid,
+          friendUid
+        );
+
+
+      const messagesRef =
+        collection(
+          db,
+          "chats",
+          chatId,
+          "messages"
+        );
+
+
+      try {
+
+        const snapshot =
+          await new Promise(
+            (resolve, reject) => {
+
+              const unsubscribe =
+                onSnapshot(
+                  messagesRef,
+
+                  (snap) => {
+
+                    unsubscribe();
+
+                    resolve(snap);
+
+                  },
+
+                  reject
+                );
+
+            }
+          );
+
+
+        for (
+          const messageDoc
+          of snapshot.docs
+        ) {
+
+          await deleteDoc(
+            doc(
+              db,
+              "chats",
+              chatId,
+              "messages",
+              messageDoc.id
+            )
+          );
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "Clear chat error:",
+          error
+        );
+
+
+        alert(
+          "Chat clear नहीं हुई:\n" +
+          error.message
+        );
+
+      }
 
     }
-
-  });
+  );
 
 }
