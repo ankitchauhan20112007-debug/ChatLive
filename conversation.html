@@ -1,82 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>ChatLive</title>
+  <title>ChatLive Chat</title>
 
   <style>
-
     * {
       box-sizing: border-box;
     }
 
-    html,
     body {
       margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
       font-family: Arial, sans-serif;
       background: #efeae2;
     }
 
-    .chat-page {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* =========================
-       HEADER
-    ========================= */
-
     .chat-header {
       height: 65px;
-      min-height: 65px;
-
-      background: #075E54;
+      background: #075e54;
       color: white;
-
       display: flex;
       align-items: center;
-
-      padding: 7px 10px;
-      gap: 9px;
-
-      position: relative;
-      z-index: 100;
+      padding: 8px 10px;
+      gap: 10px;
     }
 
     .back-btn {
       color: white;
       text-decoration: none;
-
-      font-size: 32px;
-      line-height: 1;
-
-      padding: 3px;
-
-      flex-shrink: 0;
+      font-size: 28px;
     }
 
     #friendPhoto {
       width: 45px;
       height: 45px;
-
       border-radius: 50%;
       object-fit: cover;
-
       background: #ddd;
-
-      flex-shrink: 0;
     }
 
     .friend-info {
@@ -85,407 +47,237 @@
     }
 
     #friendName {
-      font-size: 20px;
+      font-size: 17px;
       font-weight: bold;
-
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     #friendStatus {
-      font-size: 13px;
-      margin-top: 2px;
-    }
-
-    /* =========================
-       THREE DOT BUTTON
-    ========================= */
-
-    .header-menu {
-      position: relative;
-      flex-shrink: 0;
+      font-size: 12px;
+      margin-top: 3px;
+      color: #ddd;
     }
 
     #menuBtn {
-      width: 42px;
-      height: 52px;
-
       border: none;
       background: transparent;
-
       color: white;
-
-      font-size: 30px;
-      line-height: 1;
-
-      padding: 0;
-
+      font-size: 27px;
       cursor: pointer;
     }
 
-    /* =========================
-       MENU
-    ========================= */
-
-    .chat-menu {
+    .menu {
       display: none;
-
       position: absolute;
-
-      right: 0;
-      top: 55px;
-
-      width: 190px;
-
+      right: 10px;
+      top: 58px;
       background: white;
-
-      border-radius: 8px;
-
-      box-shadow:
-        0 3px 15px rgba(0,0,0,.3);
-
+      width: 170px;
+      border-radius: 10px;
+      box-shadow: 0 3px 15px rgba(0,0,0,.25);
       overflow: hidden;
-
-      z-index: 9999;
+      z-index: 20;
     }
 
-    .chat-menu.show {
+    .menu.show {
       display: block;
     }
 
-    .chat-menu button {
+    .menu button {
       width: 100%;
-
       border: none;
-
       background: white;
-
-      color: #222;
-
+      padding: 13px;
       text-align: left;
-
-      padding: 14px 15px;
-
       font-size: 15px;
-
       cursor: pointer;
     }
 
-    .chat-menu button:active {
-      background: #eeeeee;
+    .menu button:active {
+      background: #eee;
     }
 
-    /* =========================
-       MESSAGES
-    ========================= */
+    #searchBox {
+      display: none;
+      background: white;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #searchInput {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      padding: 0 15px;
+      font-size: 16px;
+      outline: none;
+    }
 
     #messages {
-      flex: 1;
-
+      height: calc(100vh - 125px);
       overflow-y: auto;
-
-      padding: 10px;
-
-      background: #efeae2;
-
+      padding: 12px;
       display: flex;
       flex-direction: column;
+      gap: 6px;
     }
 
     .message-box {
       max-width: 78%;
-
-      padding: 8px 10px;
-
-      margin: 4px 0;
-
-      border-radius: 12px;
-
-      font-size: 17px;
-
-      word-break: break-word;
-
-      box-shadow:
-        0 1px 2px rgba(0,0,0,.15);
+      padding: 8px 10px 5px;
+      border-radius: 10px;
+      font-size: 15px;
+      word-wrap: break-word;
     }
 
     .my-message {
       align-self: flex-end;
-
-      background: #d9fdd3;
-
-      border-bottom-right-radius: 3px;
+      background: #dcf8c6;
+      border-top-right-radius: 3px;
     }
 
     .friend-message {
       align-self: flex-start;
-
       background: white;
-
-      border-bottom-left-radius: 3px;
-    }
-
-    .message-image {
-      width: 100%;
-      max-width: 300px;
-
-      border-radius: 10px;
-
-      display: block;
+      border-top-left-radius: 3px;
     }
 
     .message-bottom {
       text-align: right;
-
       font-size: 10px;
-
       color: #777;
-
       margin-top: 4px;
     }
 
     .ticks {
-      font-size: 12px;
-      margin-left: 3px;
+      font-size: 13px;
+      margin-left: 4px;
     }
 
-    /* =========================
-       COMPOSER
-    ========================= */
+    .message-image {
+      max-width: 220px;
+      max-height: 300px;
+      border-radius: 8px;
+      display: block;
+      margin-top: 3px;
+    }
 
     .composer {
-      min-height: 70px;
-
-      background: white;
-
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #f0f0f0;
       display: flex;
-
       align-items: center;
-
-      gap: 8px;
-
-      padding: 8px 10px;
-
-      border-top: 1px solid #ddd;
+      gap: 7px;
+      padding: 7px;
     }
 
     .camera-btn {
-      width: 52px;
-      height: 52px;
-
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-
-      background: #075E54;
-
-      color: white;
-
+      background: white;
       display: flex;
-
       align-items: center;
       justify-content: center;
-
-      font-size: 27px;
-
-      flex-shrink: 0;
-
+      font-size: 21px;
       cursor: pointer;
+    }
+
+    #chatPhoto {
+      display: none;
     }
 
     #message {
       flex: 1;
-
-      height: 52px;
-
-      border: 1px solid #ccc;
-
-      border-radius: 28px;
-
-      padding: 0 17px;
-
-      font-size: 17px;
-
+      height: 42px;
+      border: none;
+      border-radius: 22px;
+      padding: 0 15px;
+      font-size: 16px;
       outline: none;
-
-      min-width: 0;
-    }
-
-    #message:focus {
-      border-color: #075E54;
     }
 
     #sendBtn {
-      width: 58px;
-      height: 58px;
-
+      width: 44px;
+      height: 44px;
       border: none;
-
       border-radius: 50%;
-
-      background: #128CDB;
-
+      background: #128c7e;
       color: white;
-
-      font-size: 28px;
-
+      font-size: 23px;
       cursor: pointer;
-
-      flex-shrink: 0;
     }
 
-    #sendBtn:active {
-      transform: scale(.95);
+    #sendBtn:disabled {
+      opacity: .5;
     }
-
-    /* =========================
-       MOBILE
-    ========================= */
-
-    @media (max-width: 400px) {
-
-      .chat-header {
-        padding-left: 6px;
-        padding-right: 6px;
-      }
-
-      #friendPhoto {
-        width: 43px;
-        height: 43px;
-      }
-
-      #friendName {
-        font-size: 18px;
-      }
-
-      .composer {
-        gap: 5px;
-        padding: 7px 6px;
-      }
-
-      .camera-btn {
-        width: 50px;
-        height: 50px;
-      }
-
-      #sendBtn {
-        width: 54px;
-        height: 54px;
-      }
-
-      #message {
-        font-size: 16px;
-      }
-    }
-
   </style>
-
 </head>
-
 
 <body>
 
-<div class="chat-page">
-
-  <!-- =========================
-       HEADER
-  ========================= -->
-
+  <!-- Header -->
   <div class="chat-header">
 
-    <a
-      href="chat.html"
-      class="back-btn"
-    >
-      ←
-    </a>
-
+    <a href="chat.html" class="back-btn">‹</a>
 
     <img
       id="friendPhoto"
-      src="https://via.placeholder.com/100"
+      src="https://via.placeholder.com/60"
       alt="Profile"
     >
 
-
     <div class="friend-info">
-
-      <div id="friendName">
-        Loading...
-      </div>
-
-      <div id="friendStatus">
-        Checking...
-      </div>
-
+      <div id="friendName">Loading...</div>
+      <div id="friendStatus">Checking...</div>
     </div>
 
+    <button id="menuBtn">⋮</button>
 
-    <!-- ONLY ONE MENU BUTTON -->
+    <div id="chatMenu" class="menu">
 
-    <div class="header-menu">
-
-      <button
-        id="menuBtn"
-        type="button"
-      >
-        ⋮
+      <button id="searchBtn">
+        🔍 Search
       </button>
 
+      <button id="mediaBtn">
+        🖼️ Media
+      </button>
 
-      <div
-        id="chatMenu"
-        class="chat-menu"
-      >
+      <button id="muteBtn">
+        🔕 Mute
+      </button>
 
-        <button
-          type="button"
-          id="searchBtn"
-        >
-          🔍 Search
-        </button>
-
-
-        <button
-          type="button"
-          id="mediaBtn"
-        >
-          🖼️ Media
-        </button>
-
-
-        <button
-          type="button"
-          id="muteBtn"
-        >
-          🔕 Mute notifications
-        </button>
-
-
-        <button
-          type="button"
-          id="clearChatBtn"
-        >
-          🗑️ Clear chat
-        </button>
-
-      </div>
+      <button id="clearChatBtn">
+        🗑️ Clear Chat
+      </button>
 
     </div>
 
   </div>
 
+  <!-- Search -->
+  <div id="searchBox">
 
-  <!-- =========================
-       MESSAGES
-  ========================= -->
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search messages..."
+    >
 
+  </div>
+
+  <!-- Messages -->
   <div id="messages"></div>
 
-
-  <!-- =========================
-       MESSAGE BOX
-  ========================= -->
-
+  <!-- Composer -->
   <div class="composer">
 
     <label
@@ -495,174 +287,26 @@
       📷
     </label>
 
-
     <input
       type="file"
       id="chatPhoto"
       accept="image/*"
-      style="display:none;"
     >
-
 
     <input
       type="text"
       id="message"
-      placeholder="Type a message..."
+      placeholder="Message"
       autocomplete="off"
     >
 
-
-    <button
-      id="sendBtn"
-      type="button"
-    >
+    <button id="sendBtn">
       ➤
     </button>
 
   </div>
 
-</div>
-
-
-<!-- =========================
-     ONLY ONE conversation.js
-========================= -->
-
-<script
-  type="module"
-  src="./conversation.js"
-></script>
-
-
-<script>
-
-  /* =========================
-     THREE DOT MENU
-  ========================= */
-
-  const menuBtn =
-    document.getElementById("menuBtn");
-
-  const chatMenu =
-    document.getElementById("chatMenu");
-
-
-  menuBtn.addEventListener(
-    "click",
-    function(event) {
-
-      event.stopPropagation();
-
-      chatMenu.classList.toggle("show");
-
-    }
-  );
-
-
-  /* =========================
-     CLOSE MENU
-  ========================= */
-
-  document.addEventListener(
-    "click",
-    function() {
-
-      chatMenu.classList.remove("show");
-
-    }
-  );
-
-
-  /* =========================
-     SEARCH
-  ========================= */
-
-  document
-    .getElementById("searchBtn")
-    .addEventListener(
-      "click",
-      function() {
-
-        chatMenu.classList.remove("show");
-
-        alert(
-          "Search feature next step me banayenge."
-        );
-
-      }
-    );
-
-
-  /* =========================
-     MEDIA
-  ========================= */
-
-  document
-    .getElementById("mediaBtn")
-    .addEventListener(
-      "click",
-      function() {
-
-        chatMenu.classList.remove("show");
-
-        alert(
-          "Media feature next step me banayenge."
-        );
-
-      }
-    );
-
-
-  /* =========================
-     MUTE
-  ========================= */
-
-  document
-    .getElementById("muteBtn")
-    .addEventListener(
-      "click",
-      function() {
-
-        chatMenu.classList.remove("show");
-
-        alert(
-          "Mute notifications next step me banayenge."
-        );
-
-      }
-    );
-
-
-  /* =========================
-     CLEAR CHAT
-  ========================= */
-
-  document
-    .getElementById("clearChatBtn")
-    .addEventListener(
-      "click",
-      function() {
-
-        chatMenu.classList.remove("show");
-
-        const ok =
-          confirm(
-            "Kya aap chat clear karna chahte ho?"
-          );
-
-
-        if (ok) {
-
-          alert(
-            "Clear chat feature next step me banayenge."
-          );
-
-        }
-
-      }
-    );
-
-</script>
+  <script type="module" src="./conversation.js"></script>
 
 </body>
 </html>
