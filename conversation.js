@@ -12,13 +12,14 @@ import {
   orderBy,
   serverTimestamp,
   doc,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
-// ===============================
-// ELEMENTS
-// ===============================
+/* =========================
+   ELEMENTS
+========================= */
 
 const messagesDiv =
   document.getElementById("messages");
@@ -38,10 +39,37 @@ const friendPhoto =
 const friendStatus =
   document.getElementById("friendStatus");
 
+const menuBtn =
+  document.getElementById("menuBtn");
 
-// ===============================
-// FRIEND DATA
-// ===============================
+const chatMenu =
+  document.getElementById("chatMenu");
+
+const searchBtn =
+  document.getElementById("searchBtn");
+
+const searchBox =
+  document.getElementById("searchBox");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const mediaBtn =
+  document.getElementById("mediaBtn");
+
+const muteBtn =
+  document.getElementById("muteBtn");
+
+const clearChatBtn =
+  document.getElementById("clearChatBtn");
+
+const chatPhoto =
+  document.getElementById("chatPhoto");
+
+
+/* =========================
+   FRIEND DATA
+========================= */
 
 const friendUid =
   localStorage.getItem("chatFriendUid");
@@ -49,10 +77,6 @@ const friendUid =
 const savedFriendName =
   localStorage.getItem("chatFriendName");
 
-
-// ===============================
-// CHECK FRIEND
-// ===============================
 
 if (!friendUid) {
 
@@ -62,9 +86,9 @@ if (!friendUid) {
 }
 
 
-// ===============================
-// CHAT ID
-// ===============================
+/* =========================
+   CHAT ID
+========================= */
 
 function getChatId(uid1, uid2) {
 
@@ -75,33 +99,29 @@ function getChatId(uid1, uid2) {
 }
 
 
-// ===============================
-// LOGIN
-// ===============================
+/* =========================
+   AUTH
+========================= */
 
-onAuthStateChanged(
-  auth,
-  (user) => {
+onAuthStateChanged(auth, (user) => {
 
-    if (!user) {
+  if (!user) {
 
-      window.location.href =
-        "index.html";
+    window.location.href = "index.html";
 
-      return;
-    }
-
-    loadFriend();
-
-    loadMessages(user);
-
+    return;
   }
-);
+
+  loadFriend();
+
+  loadMessages(user);
+
+});
 
 
-// ===============================
-// FRIEND INFO
-// ===============================
+/* =========================
+   FRIEND INFO
+========================= */
 
 function loadFriend() {
 
@@ -113,75 +133,60 @@ function loadFriend() {
 
 
   const friendRef =
-    doc(
-      db,
-      "users",
-      friendUid
-    );
+    doc(db, "users", friendUid);
 
 
-  onSnapshot(
-    friendRef,
-    (snap) => {
+  onSnapshot(friendRef, (snap) => {
 
-      if (!snap.exists()) {
-        return;
-      }
+    if (!snap.exists()) return;
 
 
-      const data =
-        snap.data();
+    const data =
+      snap.data();
 
 
-      // NAME
-
-      friendName.textContent =
-        data.name ||
-        data.username ||
-        data.displayName ||
-        savedFriendName ||
-        "User";
+    friendName.textContent =
+      data.name ||
+      data.username ||
+      data.displayName ||
+      savedFriendName ||
+      "User";
 
 
-      // PHOTO
+    if (data.photo) {
 
-      if (data.photo) {
-
-        friendPhoto.src =
-          data.photo;
-
-      }
-
-
-      // ONLINE
-
-      if (data.online === true) {
-
-        friendStatus.textContent =
-          "online";
-
-        friendStatus.style.color =
-          "#25D366";
-
-      } else {
-
-        friendStatus.textContent =
-          "offline";
-
-        friendStatus.style.color =
-          "#ddd";
-
-      }
+      friendPhoto.src =
+        data.photo;
 
     }
-  );
+
+
+    if (data.online === true) {
+
+      friendStatus.textContent =
+        "online";
+
+      friendStatus.style.color =
+        "#25D366";
+
+    } else {
+
+      friendStatus.textContent =
+        "offline";
+
+      friendStatus.style.color =
+        "#ddd";
+
+    }
+
+  });
 
 }
 
 
-// ===============================
-// LOAD MESSAGES
-// ===============================
+/* =========================
+   LOAD MESSAGES
+========================= */
 
 function loadMessages(currentUser) {
 
@@ -204,15 +209,13 @@ function loadMessages(currentUser) {
   const messagesQuery =
     query(
       messagesRef,
-      orderBy(
-        "createdAt",
-        "asc"
-      )
+      orderBy("createdAt", "asc")
     );
 
 
   onSnapshot(
     messagesQuery,
+
     (snapshot) => {
 
       messagesDiv.innerHTML = "";
@@ -231,8 +234,6 @@ function loadMessages(currentUser) {
           );
 
 
-          // Friend message read
-
           if (
             data.sender === friendUid &&
             data.receiver === currentUser.uid &&
@@ -250,20 +251,17 @@ function loadMessages(currentUser) {
       );
 
 
-      // Scroll bottom
+      applySearch();
 
-      setTimeout(
-        () => {
 
-          messagesDiv.scrollTop =
-            messagesDiv.scrollHeight;
+      setTimeout(() => {
 
-        },
-        50
-      );
+        messagesDiv.scrollTop =
+          messagesDiv.scrollHeight;
+
+      }, 50);
 
     },
-
 
     (error) => {
 
@@ -273,14 +271,15 @@ function loadMessages(currentUser) {
       );
 
     }
+
   );
 
 }
 
 
-// ===============================
-// CREATE MESSAGE
-// ===============================
+/* =========================
+   CREATE MESSAGE
+========================= */
 
 function createMessage(
   data,
@@ -297,34 +296,23 @@ function createMessage(
       : "message-box friend-message";
 
 
-  // ===============================
-  // TEXT
-  // ===============================
-
   if (data.text) {
 
     const text =
       document.createElement("div");
 
-
     text.textContent =
       data.text;
-
 
     box.appendChild(text);
 
   }
 
 
-  // ===============================
-  // IMAGE
-  // ===============================
-
   if (data.image) {
 
     const image =
       document.createElement("img");
-
 
     image.src =
       data.image;
@@ -335,28 +323,19 @@ function createMessage(
     image.loading =
       "lazy";
 
-
-    box.appendChild(
-      image
-    );
+    box.appendChild(image);
 
   }
 
 
-  // ===============================
-  // TIME
-  // ===============================
-
   const bottom =
     document.createElement("div");
-
 
   bottom.className =
     "message-bottom";
 
 
-  let timeText =
-    "";
+  let timeText = "";
 
 
   if (data.createdAt) {
@@ -389,13 +368,7 @@ function createMessage(
     timeText;
 
 
-  // ===============================
-  // TICKS
-  // ===============================
-
-  if (
-    data.sender === currentUid
-  ) {
+  if (data.sender === currentUid) {
 
     const ticks =
       document.createElement("span");
@@ -436,9 +409,9 @@ function createMessage(
 }
 
 
-// ===============================
-// SEND MESSAGE
-// ===============================
+/* =========================
+   SEND TEXT MESSAGE
+========================= */
 
 async function sendMessage() {
 
@@ -451,7 +424,6 @@ async function sendMessage() {
     alert("Please login first.");
 
     return;
-
   }
 
 
@@ -459,9 +431,7 @@ async function sendMessage() {
     messageInput.value.trim();
 
 
-  if (!text) {
-    return;
-  }
+  if (!text) return;
 
 
   const chatId =
@@ -489,7 +459,6 @@ async function sendMessage() {
     await addDoc(
       messagesRef,
       {
-
         sender:
           currentUser.uid,
 
@@ -507,14 +476,12 @@ async function sendMessage() {
 
         createdAt:
           serverTimestamp()
-
       }
     );
 
 
     messageInput.value =
       "";
-
 
     messageInput.focus();
 
@@ -541,9 +508,9 @@ async function sendMessage() {
 }
 
 
-// ===============================
-// SEND BUTTON
-// ===============================
+/* =========================
+   SEND BUTTON
+========================= */
 
 if (sendBtn) {
 
@@ -555,9 +522,9 @@ if (sendBtn) {
 }
 
 
-// ===============================
-// ENTER TO SEND
-// ===============================
+/* =========================
+   ENTER SEND
+========================= */
 
 if (messageInput) {
 
@@ -581,9 +548,9 @@ if (messageInput) {
 }
 
 
-// ===============================
-// MARK AS READ
-// ===============================
+/* =========================
+   MARK AS READ
+========================= */
 
 async function markAsRead(
   chatId,
@@ -609,6 +576,7 @@ async function markAsRead(
       }
     );
 
+
   } catch (error) {
 
     console.error(
@@ -617,5 +585,355 @@ async function markAsRead(
     );
 
   }
+
+}
+
+
+/* =========================
+   THREE DOT MENU
+========================= */
+
+if (menuBtn) {
+
+  menuBtn.addEventListener(
+    "click",
+    (event) => {
+
+      event.stopPropagation();
+
+      chatMenu.classList.toggle(
+        "show"
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================
+   CLOSE MENU
+========================= */
+
+document.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      !chatMenu.contains(event.target) &&
+      event.target !== menuBtn
+    ) {
+
+      chatMenu.classList.remove(
+        "show"
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================
+   SEARCH BUTTON
+========================= */
+
+if (searchBtn) {
+
+  searchBtn.addEventListener(
+    "click",
+    () => {
+
+      chatMenu.classList.remove(
+        "show"
+      );
+
+
+      if (
+        searchBox.style.display ===
+        "none" ||
+        searchBox.style.display === ""
+      ) {
+
+        searchBox.style.display =
+          "block";
+
+        searchInput.focus();
+
+      } else {
+
+        searchBox.style.display =
+          "none";
+
+        searchInput.value =
+          "";
+
+        applySearch();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================
+   SEARCH MESSAGES
+========================= */
+
+if (searchInput) {
+
+  searchInput.addEventListener(
+    "input",
+    () => {
+
+      applySearch();
+
+    }
+  );
+
+}
+
+
+function applySearch() {
+
+  if (!messagesDiv) return;
+
+
+  const search =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  const allMessages =
+    document.querySelectorAll(
+      ".message-box"
+    );
+
+
+  allMessages.forEach(
+    (message) => {
+
+      const text =
+        message.textContent
+          .toLowerCase();
+
+
+      if (
+        search === "" ||
+        text.includes(search)
+      ) {
+
+        message.style.display =
+          "";
+
+      } else {
+
+        message.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================
+   MEDIA BUTTON
+========================= */
+
+if (mediaBtn) {
+
+  mediaBtn.addEventListener(
+    "click",
+    () => {
+
+      chatMenu.classList.remove(
+        "show"
+      );
+
+
+      const images =
+        document.querySelectorAll(
+          ".message-image"
+        );
+
+
+      if (images.length === 0) {
+
+        alert(
+          "इस chat में अभी कोई photo नहीं है।"
+        );
+
+        return;
+
+      }
+
+
+      images[0].scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+    }
+  );
+
+}
+
+
+/* =========================
+   MUTE BUTTON
+========================= */
+
+let isMuted =
+  localStorage.getItem(
+    "chatMuted_" + friendUid
+  ) === "true";
+
+
+if (muteBtn) {
+
+  updateMuteButton();
+
+
+  muteBtn.addEventListener(
+    "click",
+    () => {
+
+      isMuted =
+        !isMuted;
+
+
+      localStorage.setItem(
+        "chatMuted_" + friendUid,
+        isMuted
+      );
+
+
+      updateMuteButton();
+
+
+      chatMenu.classList.remove(
+        "show"
+      );
+
+    }
+  );
+
+}
+
+
+function updateMuteButton() {
+
+  if (!muteBtn) return;
+
+
+  muteBtn.textContent =
+    isMuted
+      ? "🔔 Unmute"
+      : "🔕 Mute";
+
+}
+
+
+/* =========================
+   CLEAR CHAT
+========================= */
+
+if (clearChatBtn) {
+
+  clearChatBtn.addEventListener(
+    "click",
+    async () => {
+
+      chatMenu.classList.remove(
+        "show"
+      );
+
+
+      const currentUser =
+        auth.currentUser;
+
+
+      if (!currentUser) return;
+
+
+      const confirmClear =
+        confirm(
+          "क्या आप इस chat के सारे messages हटाना चाहते हैं?"
+        );
+
+
+      if (!confirmClear) return;
+
+
+      const chatId =
+        getChatId(
+          currentUser.uid,
+          friendUid
+        );
+
+
+      const messagesRef =
+        collection(
+          db,
+          "chats",
+          chatId,
+          "messages"
+        );
+
+
+      try {
+
+        const unsubscribe =
+          onSnapshot(
+            messagesRef,
+            async (snapshot) => {
+
+              unsubscribe();
+
+
+              for (
+                const messageDoc
+                of snapshot.docs
+              ) {
+
+                await deleteDoc(
+                  doc(
+                    db,
+                    "chats",
+                    chatId,
+                    "messages",
+                    messageDoc.id
+                  )
+                );
+
+              }
+
+            }
+          );
+
+
+      } catch (error) {
+
+        console.error(
+          "Clear chat error:",
+          error
+        );
+
+
+        alert(
+          "Chat clear नहीं हुई:\n" +
+          error.message
+        );
+
+      }
+
+    }
+  );
 
 }
