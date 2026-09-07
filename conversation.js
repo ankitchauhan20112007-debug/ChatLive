@@ -588,25 +588,20 @@ async function markAsRead(
 
 }
 
-
 /* =========================
    THREE DOT MENU
 ========================= */
 
-if (menuBtn) {
+if (menuBtn && chatMenu) {
 
-  menuBtn.addEventListener(
-    "click",
-    (event) => {
+  menuBtn.addEventListener("click", (event) => {
 
-      event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-      chatMenu.classList.toggle(
-        "show"
-      );
+    chatMenu.classList.toggle("show");
 
-    }
-  );
+  });
 
 }
 
@@ -615,23 +610,19 @@ if (menuBtn) {
    CLOSE MENU
 ========================= */
 
-document.addEventListener(
-  "click",
-  (event) => {
+document.addEventListener("click", (event) => {
 
-    if (
-      !chatMenu.contains(event.target) &&
-      event.target !== menuBtn
-    ) {
+  if (
+    chatMenu &&
+    !chatMenu.contains(event.target) &&
+    event.target !== menuBtn
+  ) {
 
-      chatMenu.classList.remove(
-        "show"
-      );
-
-    }
+    chatMenu.classList.remove("show");
 
   }
-);
+
+});
 
 
 /* =========================
@@ -640,202 +631,143 @@ document.addEventListener(
 
 if (searchBtn) {
 
-  searchBtn.addEventListener(
-    "click",
-    () => {
+  searchBtn.addEventListener("click", () => {
 
-      chatMenu.classList.remove(
-        "show"
-      );
+    if (chatMenu) {
+      chatMenu.classList.remove("show");
+    }
 
+    if (!searchBox || !searchInput) return;
 
-      if (
-        searchBox.style.display ===
-        "none" ||
-        searchBox.style.display === ""
-      ) {
+    if (searchBox.style.display === "block") {
 
-        searchBox.style.display =
-          "block";
+      searchBox.style.display = "none";
+      searchInput.value = "";
 
-        searchInput.focus();
+      applySearch();
 
-      } else {
+    } else {
 
-        searchBox.style.display =
-          "none";
-
-        searchInput.value =
-          "";
-
-        applySearch();
-
-      }
+      searchBox.style.display = "block";
+      searchInput.focus();
 
     }
-  );
+
+  });
 
 }
 
 
 /* =========================
-   SEARCH MESSAGES
+   SEARCH
 ========================= */
 
 if (searchInput) {
 
-  searchInput.addEventListener(
-    "input",
-    () => {
+  searchInput.addEventListener("input", () => {
 
-      applySearch();
+    applySearch();
 
-    }
-  );
+  });
 
 }
 
 
 function applySearch() {
 
-  if (!messagesDiv) return;
-
+  if (!messagesDiv || !searchInput) return;
 
   const search =
-    searchInput.value
-      .trim()
-      .toLowerCase();
-
+    searchInput.value.trim().toLowerCase();
 
   const allMessages =
-    document.querySelectorAll(
-      ".message-box"
-    );
+    document.querySelectorAll(".message-box");
 
+  allMessages.forEach((message) => {
 
-  allMessages.forEach(
-    (message) => {
+    const text =
+      message.textContent.toLowerCase();
 
-      const text =
-        message.textContent
-          .toLowerCase();
+    message.style.display =
+      search === "" || text.includes(search)
+        ? ""
+        : "none";
 
-
-      if (
-        search === "" ||
-        text.includes(search)
-      ) {
-
-        message.style.display =
-          "";
-
-      } else {
-
-        message.style.display =
-          "none";
-
-      }
-
-    }
-  );
+  });
 
 }
 
 
 /* =========================
-   MEDIA BUTTON
+   MEDIA
 ========================= */
 
 if (mediaBtn) {
 
-  mediaBtn.addEventListener(
-    "click",
-    () => {
+  mediaBtn.addEventListener("click", () => {
 
-      chatMenu.classList.remove(
-        "show"
-      );
+    if (chatMenu) {
+      chatMenu.classList.remove("show");
+    }
 
+    const images =
+      document.querySelectorAll(".message-image");
 
-      const images =
-        document.querySelectorAll(
-          ".message-image"
-        );
+    if (images.length === 0) {
 
-
-      if (images.length === 0) {
-
-        alert(
-          "इस chat में अभी कोई photo नहीं है।"
-        );
-
-        return;
-
-      }
-
-
-      images[0].scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+      alert("इस chat में अभी कोई photo नहीं है।");
+      return;
 
     }
-  );
+
+    images[0].scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+  });
 
 }
 
 
 /* =========================
-   MUTE BUTTON
+   MUTE
 ========================= */
 
 let isMuted =
-  localStorage.getItem(
-    "chatMuted_" + friendUid
-  ) === "true";
-
-
-if (muteBtn) {
-
-  updateMuteButton();
-
-
-  muteBtn.addEventListener(
-    "click",
-    () => {
-
-      isMuted =
-        !isMuted;
-
-
-      localStorage.setItem(
-        "chatMuted_" + friendUid,
-        isMuted
-      );
-
-
-      updateMuteButton();
-
-
-      chatMenu.classList.remove(
-        "show"
-      );
-
-    }
-  );
-
-}
+  localStorage.getItem("chatMuted_" + friendUid) === "true";
 
 
 function updateMuteButton() {
 
   if (!muteBtn) return;
 
-
   muteBtn.textContent =
-    isMuted
-      ? "🔔 Unmute"
-      : "🔕 Mute";
+    isMuted ? "🔔 Unmute" : "🔕 Mute";
+
+}
+
+
+if (muteBtn) {
+
+  updateMuteButton();
+
+  muteBtn.addEventListener("click", () => {
+
+    isMuted = !isMuted;
+
+    localStorage.setItem(
+      "chatMuted_" + friendUid,
+      isMuted
+    );
+
+    updateMuteButton();
+
+    if (chatMenu) {
+      chatMenu.classList.remove("show");
+    }
+
+  });
 
 }
 
@@ -846,94 +778,77 @@ function updateMuteButton() {
 
 if (clearChatBtn) {
 
-  clearChatBtn.addEventListener(
-    "click",
-    async () => {
+  clearChatBtn.addEventListener("click", async () => {
 
-      chatMenu.classList.remove(
-        "show"
+    if (chatMenu) {
+      chatMenu.classList.remove("show");
+    }
+
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) return;
+
+    const confirmClear = confirm(
+      "क्या आप इस chat के सारे messages हटाना चाहते हैं?"
+    );
+
+    if (!confirmClear) return;
+
+    const chatId =
+      getChatId(currentUser.uid, friendUid);
+
+    const messagesRef =
+      collection(
+        db,
+        "chats",
+        chatId,
+        "messages"
       );
 
+    try {
 
-      const currentUser =
-        auth.currentUser;
+      const snapshot =
+        await new Promise((resolve, reject) => {
 
-
-      if (!currentUser) return;
-
-
-      const confirmClear =
-        confirm(
-          "क्या आप इस chat के सारे messages हटाना चाहते हैं?"
-        );
-
-
-      if (!confirmClear) return;
-
-
-      const chatId =
-        getChatId(
-          currentUser.uid,
-          friendUid
-        );
-
-
-      const messagesRef =
-        collection(
-          db,
-          "chats",
-          chatId,
-          "messages"
-        );
-
-
-      try {
-
-        const unsubscribe =
-          onSnapshot(
+          const unsubscribe = onSnapshot(
             messagesRef,
-            async (snapshot) => {
-
+            (snap) => {
               unsubscribe();
-
-
-              for (
-                const messageDoc
-                of snapshot.docs
-              ) {
-
-                await deleteDoc(
-                  doc(
-                    db,
-                    "chats",
-                    chatId,
-                    "messages",
-                    messageDoc.id
-                  )
-                );
-
-              }
-
-            }
+              resolve(snap);
+            },
+            reject
           );
 
+        });
 
-      } catch (error) {
+      for (const messageDoc of snapshot.docs) {
 
-        console.error(
-          "Clear chat error:",
-          error
-        );
-
-
-        alert(
-          "Chat clear नहीं हुई:\n" +
-          error.message
+        await deleteDoc(
+          doc(
+            db,
+            "chats",
+            chatId,
+            "messages",
+            messageDoc.id
+          )
         );
 
       }
 
+    } catch (error) {
+
+      console.error(
+        "Clear chat error:",
+        error
+      );
+
+      alert(
+        "Chat clear नहीं हुई:\n" +
+        error.message
+      );
+
     }
-  );
+
+  });
 
 }
